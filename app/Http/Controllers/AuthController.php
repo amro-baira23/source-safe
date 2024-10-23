@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     function login(AuthRequest $request){
+        echo $request->user;
+        echo $request->thing;
         if(!Auth::attempt($request->only("username","password"))){
             return response(["error" => "incorrect password or username"] , 401);
         }

@@ -24,32 +24,32 @@ class User extends Authenticatable
 
     public function groups()
     {
-        return $this->BelongsToMany(groups::class,'perm');
+        return $this->BelongsToMany(Group::class,'perm');
     }
 
     public function file_locks()
     {
-        return $this->BelongsToMany(files::class,'locks');
+        return $this->BelongsToMany(File::class,'locks');
     }
 
     public function file_versions()
     {
-        return $this->BelongsToMany(files::class,'versions');
+        return $this->BelongsToMany(File::class,'versions');
     }
 
     public function locks()
     {
-        return $this->hasMany(locks::class, 'user_id');
+        return $this->hasMany(Lock::class, 'user_id');
     }
 
     public function versions()
     {
-        return $this->hasMany(versions::class, 'user_id');
+        return $this->hasMany(Version::class, 'user_id');
     }
     
     public function perms()
     {
-        return $this->hasMany(perm::class, 'user_id');
+        return $this->hasMany(Perm::class, 'user_id');
     }
 
 

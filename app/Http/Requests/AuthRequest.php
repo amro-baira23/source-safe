@@ -24,10 +24,12 @@ class AuthRequest extends FormRequest
      */
     public function rules(): array
     {
-        if ($this->route()->getName() === "login") {
+
+        if ($this->is("*login")) 
             return $this->getLoginRules();
-        }
-        return $this->getRegisterRules();
+        if ($this->is("*register"))
+            return $this->getRegisterRules();
+        return [];
     }
 
     private function getLoginRules(): array

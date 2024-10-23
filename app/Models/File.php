@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class files extends Model
+class File extends Model
 {
     use HasFactory;
 
@@ -18,7 +18,7 @@ class files extends Model
 
     public function group()
     {
-        return $this->belongsTo(groups::class, 'group_id');
+        return $this->belongsTo(Group::class, 'group_id');
     }
 
     public function user_locks()
@@ -33,12 +33,12 @@ class files extends Model
 
     public function locks()
     {
-        return $this->hasMany(locks::class, 'file_id');
+        return $this->hasMany(Lock::class, 'file_id');
     }
 
     public function versions()
     {
-        return $this->hasMany(versions::class, 'file_id');
+        return $this->hasMany(Version::class, 'file_id');
     }
 
 }

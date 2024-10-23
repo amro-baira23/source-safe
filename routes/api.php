@@ -20,11 +20,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::controller(AuthController::class)->group(function () {
-    Route::post("/login","login")->name("login");
-    Route::post("/register","register")->name("register");
+    Route::post("/login/{user}","login");
+    Route::post("/register","register");
     
 });
 
 Route::middleware("auth:sanctum")->post("/test",function (Request $request){
-   
+
 });

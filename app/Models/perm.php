@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class perm extends Model
+class Perm extends Model
 {
     use HasFactory;
 
@@ -18,7 +18,7 @@ class perm extends Model
 
     public function group()
     {
-        return $this->belongsTo(groups::class, 'group_id');
+        return $this->belongsTo(Group::class, 'group_id');
     }
 
     public function user()

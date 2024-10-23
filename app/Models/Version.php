@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class versions extends Model
+class Version extends Model
 {
     use HasFactory;
 
@@ -18,7 +18,7 @@ class versions extends Model
 
     public function file()
     {
-        return $this->belongsTo(files::class, 'file_id');
+        return $this->belongsTo(File::class, 'file_id');
     }
 
     public function user()

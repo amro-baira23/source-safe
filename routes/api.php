@@ -22,7 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::controller(AuthController::class)->group(function () {
-    Route::post("/login/{user}","login");
+    Route::post("/login","login");
     Route::post("/register","register");
 
 });
@@ -35,6 +35,7 @@ Route::middleware("auth:sanctum")->controller(GroupsController::class)->group(fu
     Route::get("/index_group","index_group");
     Route::post("/update_group/{id}","update_group");
     Route::post("/joinGroup/{id}","joinGroup");
+    Route::get("/groups/{group}/join_requests","getJoinRequests");
     Route::post("/approveMember/{groupId}/{userId}","approveMember");
 
 });

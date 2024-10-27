@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\GroupRequest;
 use App\Http\Responses\Response;
+use App\Models\Group;
 use App\Services\GroupService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -72,6 +73,17 @@ class GroupsController extends Controller
         try{
             $data = $this->GroupService->joinGroup($groupId);
             return Response::Success($data['message'],$data['code']);
+        }catch(Throwable $th){
+            $message = $th->getMessage();
+            return Response::Error($data,$message );
+        }
+     }
+
+     public function getJoinRequests(Group $group){
+        $data = [];
+        try{
+            $data = $this->GroupService->getJoinRequests($group);
+            return Response::Success($data["requests"],$data['message'],$data['code']);
         }catch(Throwable $th){
             $message = $th->getMessage();
             return Response::Error($data,$message );

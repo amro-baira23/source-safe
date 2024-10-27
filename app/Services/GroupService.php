@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Resources\GroupResource;
 use App\Http\Resources\JoinRequestsResource;
 use App\Models\Group;
 use App\Models\Perm;
@@ -40,7 +41,7 @@ public function store_group(Request $request): array
             $code = 404;
         }
 
-        return ['groups' => $groups, 'message' => $message, 'code' => $code];
+        return ['groups' => GroupResource::collection($groups), 'message' => $message, 'code' => $code];
     }
 
     public function show_group($id): array
@@ -85,6 +86,7 @@ public function store_group(Request $request): array
             if ($group->users()->where('user_id', auth()->id())->exists()) {
                 $message = "You are already a member of this group";
                 $code = 400;
+                return ['message' => $message, 'code' => $code];
             }
 
             $group->users()->attach(auth()->id(), ['role' => 'member', 'approved' => false]);

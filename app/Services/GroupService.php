@@ -81,6 +81,7 @@ public function store_group(Request $request): array
 
     public function joinGroup($groupId): array
         {
+
             $group = Group::findOrFail($groupId);
 
             if ($group->users()->where('user_id', auth()->id())->exists()) {

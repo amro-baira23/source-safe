@@ -7,13 +7,25 @@ use App\Http\Resources\FileResource;
 use Illuminate\Http\Request;
 use App\Models\File;
 use App\Models\Lock;
+use App\Services\FileService;
 use Illuminate\Support\Facades\URL;
-
+use App\Http\Responses\Response;
+use Illuminate\Http\JsonResponse;
+use Throwable;
 class FilesController extends Controller
 {
      /**
      * Display a listing of the resource.
      */
+
+     private FileService $FileService ;
+
+    public function __construct(FileService $FileService)
+    {
+       $this->FileService = $FileService ;
+    }
+
+
     public function index()
     {
         $files = File::all();
@@ -31,32 +43,18 @@ class FilesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(FileRequest $request)
+    public function store_file(FileRequest $request): JsonResponse
     {
+        $data = [];
+        try{
+            $data = $this->FileService->store_file($request);
+            return Response::Success($data['file'],$data['message'] );
 
-        $filename = '';
-        if($request->hasFile('path')){
-            $filename  = $request->file('path')->store('public/files');
+        }catch(Throwable $th){
+            $message = $th->getMessage();
+            return Response::Error($data,$message );
         }
-        $file = File::query()->create([
-        'name'=>$request['name'],
-        'path'=>$filename,
-        'group_id'=>$request['group_id'],
-        'active' => 0,
-        ]);
-
-        $filelocks = Lock::query()->create([
-            'user_id' => auth()->user()->id,
-            'file_id' => $file->id,
-            'status' => 0 ,
-            'type' => $file->extension(),
-            'size' => $file->getsize(),
-            'version_number' => 1,
-            'date'=> now(),
-        ]);
-
-         //return $this->returnSuccessMessage($msg = "success", $errNum = "S000");
-         return new  FileResource($file);
+        //  return new  FileResource($file);
     }
 
     /**
@@ -81,5 +79,5 @@ class FilesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    
+
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FilesController;
 use App\Http\Controllers\GroupsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -22,7 +23,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::controller(AuthController::class)->group(function () {
-    Route::post("/login/{user}","login");
+    Route::post("/login","login");
     Route::post("/register","register");
 
 });
@@ -36,6 +37,10 @@ Route::middleware("auth:sanctum")->controller(GroupsController::class)->group(fu
     Route::post("/update_group/{id}","update_group");
     Route::post("/joinGroup/{id}","joinGroup");
     Route::post("/approveMember/{groupId}/{userId}","approveMember");
+
+});
+Route::middleware("auth:sanctum")->controller(FilesController::class)->group(function () {
+    Route::post("/store_file","store_file");
 
 });
 

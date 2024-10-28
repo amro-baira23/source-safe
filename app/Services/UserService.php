@@ -36,12 +36,12 @@ class UserService
 
     public function login($request): array
     {
-        $user = User::query()->where('email',$request['email'])->first();
+        $user = User::query()->where('username',$request['username'])->first();
 
         if(!is_null($user)){
 
-            if(!Auth::attempt($request->only(['email', 'password']))) {
-                $message = 'email and password are not in our records';
+            if(!Auth::attempt($request->only(['username', 'password']))) {
+                $message = 'username and password are not in our records';
                 $code = 401;
             }else{
                 $user = $this->appendRolesAndPermissions($user);

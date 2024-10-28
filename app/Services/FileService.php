@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\File;
+use App\Models\Lock;
+use App\Models\Group;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,104 +12,57 @@ use Illuminate\Support\Facades\URL;
 
 class FileService
 {
-public function store_group(Request $request): array
+public function store_file(Request $request): array
     {
 
-        $group = Group::query()->create([
-        'name'=>$request['name'],
-        ]);
+        $group = Group::find($request['group_id']);
 
-        $group->users()->attach(auth()->id(), ['role' => 'admin', 'approved' => true]);
+        $admin = $group->users()->where('user_id', auth()->id())->where('role', 'admin')->first();
 
-        return [
-            'group' => $group,
-            'message' => 'Group created successfully',
-            ];
-    }
-
-    public function index_group(): array
-    {
-        $groups = Group::query()->get()->all();
-
-        if (!is_null($groups) && !empty($groups)) {
-            $message = "all the groups";
-            $code = 200;
-        } else {
-            $message = "no groups";
-            $code = 404;
-        }
-
-        return ['groups' => $groups, 'message' => $message, 'code' => $code];
-    }
-
-    public function show_group($id): array
-    {
-        $group = Group::query()->find($id);
-
-        if (!is_null($group) && !empty($group)) {
-            $message = "successfuly";
-            $code = 200;
-        } else {
-            $message = "no group";
-            $code = 404;
-        }
-
-        return ['group' => $group, 'message' => $message, 'code' => $code];
-    }
-
-
-    public function update_group(Request $request ,$groupId): array
-    {
-        $group = Group::find($groupId);
-
-        if (!is_null($group) && !empty($group)) {
-
-            $group->update([
-                'name'=>$request['name'],
-            ]);
-            $message = "success update";
-            $code = 200;
-        } else {
-            $message = "no group";
-            $code = 404;
-        }
-
-        return ['group' => $group, 'message' => $message, 'code' => $code];
-    }
-
-    public function joinGroup(Request $request, $groupId): array
-        {
-            $group = Group::findOrFail($groupId);
-
-            if ($group->users()->where('user_id', auth()->id())->exists()) {
-                $message = "You are already a member of this group";
-                $code = 400;
-            }
-
-            $group->users()->attach(auth()->id(), ['role' => 'member', 'approved' => false]);
-
-            $message = "Request to join group sent successfully";
-            $code = 200;
-
-            return ['message' => $message, 'code' => $code];
-        }
-
-        public function approveMember(Request $request, $groupId, $userId): array
-        {
-            $group = Group::findOrFail($groupId);
-
-            $admin = $group->users()->where('user_id', auth()->id())->where('role', 'admin')->first();
+                    $filename = '';
+                    if($request->hasFile('path')){
+                        $filename  = $request->file('path')->store('public/files');
+                    }
             if (!$admin) {
-                $message = "Only the admin can approve members";
-                $code = 403;
+
+                $file = File::query()->create([
+                    'name'=>$request['name'],
+                    'path'=>$filename,
+                    'group_id'=>$request['group_id'],
+                    'active' => 0,
+                    ]);
+                    return [
+
+                        'file' => $file,
+                        'message' => ' File created successfully by member ',
+                        ];
+            }else{
+                $file = File::query()->create([
+                'name'=>$request['name'],
+                'path'=>$filename,
+                'group_id'=>$request['group_id'],
+                'active' => 1,
+                ]);
+
+                $filelocks = Lock::query()->create([
+                    'user_id' => auth()->user()->id,
+                    'file_id' => $file->id,
+                    'status' => 0 ,
+                    'type' => $request['path']->extension(),
+                    'size' => $request['path']->getsize(),
+                    'Version_number' => 1,
+                    'date'=> now(),
+                ]);
+                return [
+
+                    'file' => $file,
+                    'message' => 'File created successfully by admin ',
+                    ];
             }
 
-            $group->users()->updateExistingPivot($userId, ['approved' => true]);
-                $message = "Member approved successfully";
-                $code = 200;
+    }
 
-            return ['message' => $message, 'code' => $code];
-        }
+    
 
 }
 

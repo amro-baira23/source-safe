@@ -20,7 +20,7 @@ return new class extends Migration
             $table->boolean('status');
             $table->string('type');
             $table->bigInteger('size');
-            $table->integer('Version_number');
+            $table->Integer('Version_number');
             $table->date('date');
             $table->timestamps();
         });

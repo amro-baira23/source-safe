@@ -79,11 +79,13 @@ public function store_group(Request $request): array
 
     public function joinGroup($groupId): array
         {
+
             $group = Group::findOrFail($groupId);
 
             if ($group->users()->where('user_id', auth()->id())->exists()) {
                 $message = "You are already a member of this group";
                 $code = 400;
+                return ['message' => $message, 'code' => $code];
             }
 
             $group->users()->attach(auth()->id(), ['role' => 'member', 'approved' => false]);

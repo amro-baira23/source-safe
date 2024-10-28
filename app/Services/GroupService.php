@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Group;
+use App\Models\Perm;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,7 @@ public function store_group(Request $request): array
         ]);
 
         $group->users()->attach(auth()->id(), ['role' => 'admin', 'approved' => true]);
+
 
         return [
             'group' => $group,

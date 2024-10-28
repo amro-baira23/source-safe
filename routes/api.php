@@ -29,7 +29,7 @@ Route::controller(AuthController::class)->group(function () {
 
 
 
-Route::controller(GroupsController::class)->group(function () {
+Route::middleware("auth:sanctum")->controller(GroupsController::class)->group(function () {
     Route::post("/store_group","store_group");
     Route::get("/show_group/{id}","show_group");
     Route::get("/index_group","index_group");

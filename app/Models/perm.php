@@ -13,6 +13,7 @@ class Perm extends Model
         'user_id',
         'group_id',
         'role',
+        'approved'
     ];
 
 

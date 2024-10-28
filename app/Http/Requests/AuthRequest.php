@@ -25,7 +25,7 @@ class AuthRequest extends FormRequest
     public function rules(): array
     {
 
-        if ($this->is("*login")) 
+        if ($this->is("*login"))
             return $this->getLoginRules();
         if ($this->is("*register"))
             return $this->getRegisterRules();

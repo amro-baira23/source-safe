@@ -42,7 +42,7 @@ class GroupsController extends Controller
             $message = $th->getMessage();
             return Response::Error($data,$message );
         }
-     }
+     }  
 
      public function show_group($id): JsonResponse
      {

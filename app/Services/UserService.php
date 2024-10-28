@@ -12,9 +12,9 @@ class UserService
     public function register ($request) : array
     {
         $user = User::create([
-            "username" => $request->username,
-            "password" => Hash::make($request->password),
-            "email" => $request->email
+            "username" => $request['username'],
+            "password" => Hash::make($request['password']),
+            "email" => $request['email']
         ]);
 
         $user_role = Role::query()->where('name' , 'user')->first();
@@ -87,7 +87,7 @@ class UserService
             $roles[] = $role -> name;
         }
 
-        unset($user['roles']);  
+        unset($user['roles']);
         $user['roles'] = $roles;
 
         $permissions = [];

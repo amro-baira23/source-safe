@@ -2,12 +2,15 @@
 
 namespace App\Services;
 
+use App\Http\Requests\FileRequest;
 use App\Models\File;
 use App\Models\Lock;
 use App\Models\Group;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+
 use Illuminate\Support\Facades\URL;
 
 class FileService
@@ -17,48 +20,49 @@ public function store_file(Request $request): array
 
         $group = Group::find($request['group_id']);
 
-        $admin = $group->users()->where('user_id', auth()->id())->where('role', 'admin')->first();
+        $is_admin = $group->users()->where('user_id', auth()->id())->where('role', 'admin')->first();
 
-                    $filename = '';
-                    if($request->hasFile('path')){
-                        $filename  = $request->file('path')->store('public/files');
-                    }
-            if (!$admin) {
+        $filename  = Str::random(40);
+        $file = $request->file("path");
 
-                $file = File::query()->create([
-                    'name'=>$request['name'],
-                    'path'=>$filename,
-                    'group_id'=>$request['group_id'],
-                    'active' => 0,
-                    ]);
-                    return [
+        $file->storeAs("projects_files/" . ($group->name . $group->id) , $filename . "__1" .".". $file->guessExtension());
 
-                        'file' => $file,
-                        'message' => ' File created successfully by member ',
-                        ];
-            }else{
-                $file = File::query()->create([
+        if (!$is_admin) {
+
+            $file = File::create([
                 'name'=>$request['name'],
                 'path'=>$filename,
                 'group_id'=>$request['group_id'],
-                'active' => 1,
-                ]);
+                'active' => 0,
+            ]);
 
-                $filelocks = Lock::query()->create([
-                    'user_id' => auth()->user()->id,
-                    'file_id' => $file->id,
-                    'status' => 0 ,
-                    'type' => $request['path']->extension(),
-                    'size' => $request['path']->getsize(),
-                    'Version_number' => 1,
-                    'date'=> now(),
-                ]);
-                return [
+            return [
+                'file' => $file,
+                'message' => ' File created successfully by member ',
+            ];
+        } else {
+            $file = File::create([
+            'name'=>$request['name'],
+            'path'=>$filename,
+            'group_id'=>$request['group_id'],
+            'active' => 1,
+            ]);
 
-                    'file' => $file,
-                    'message' => 'File created successfully by admin ',
-                    ];
-            }
+            $filelocks = Lock::create([
+                'user_id' => auth()->user()->id,
+                'file_id' => $file->id,
+                'status' => 0 ,
+                'type' => $request['path']->extension(),
+                'size' => $request['path']->getsize(),
+                'Version_number' => 1,
+                'date'=> now(),
+            ]);
+
+            return [
+                'file' => $file,
+                'message' => 'File created successfully by admin ',
+            ];
+        }
 
     }
 

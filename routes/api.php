@@ -3,8 +3,11 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FilesController;
 use App\Http\Controllers\GroupsController;
+use App\Http\Responses\Response;
+use Illuminate\Contracts\Cache\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use PHPUnit\TextUI\Configuration\GroupCollection;
 
 /*
@@ -47,5 +50,8 @@ Route::middleware("auth:sanctum")->controller(FilesController::class)->group(fun
 
 
 Route::middleware("auth:sanctum")->post("/test",function (Request $request){
-
+    $filename = $request->file("file")->store("my_files");
+    dump(storage_path($filename));
+    Storage::delete(Storage::allFiles());
+    return response()->download(storage_path("app//" . $filename . "__1"));
 });

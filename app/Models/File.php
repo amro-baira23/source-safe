@@ -12,8 +12,8 @@ class File extends Model
     protected $fillable = [
         'name',
         'group_id',
-        'size',
-        'type',
+        'path',
+        'active',
     ];
 
     public function group()

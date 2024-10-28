@@ -21,6 +21,6 @@ class Group extends Model
 
     public function users()
     {
-        return $this->BelongsToMany(User::class,'perm');
+        return $this->belongsToMany(User::class , 'perms')->withPivot('role', 'approved')->withTimestamps();
     }
 }

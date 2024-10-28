@@ -5,16 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Lock extends Model
+class locks extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
         'file_id',
-        'type',
-        'size',
-        'Version_number',
         'status',
         'date',
     ];

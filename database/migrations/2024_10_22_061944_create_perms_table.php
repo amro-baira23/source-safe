@@ -17,7 +17,8 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->unsignedBigInteger('group_id');
             $table->foreign('group_id')->references('id')->on('groups')->cascadeOnDelete();
-            $table->string('role');
+            $table->enum('role', ['admin', 'member'])->default('member');
+            $table->boolean('approved')->default(false);
             $table->timestamps();
         });
     }

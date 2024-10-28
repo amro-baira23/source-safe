@@ -24,7 +24,7 @@ class User extends Authenticatable
 
     public function groups()
     {
-        return $this->BelongsToMany(Group::class,'perm');
+        return $this->belongsToMany(Group::class ,'perms')->withPivot('role', 'approved')->withTimestamps();
     }
 
     public function file_locks()
@@ -46,7 +46,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Version::class, 'user_id');
     }
-    
+
     public function perms()
     {
         return $this->hasMany(Perm::class, 'user_id');

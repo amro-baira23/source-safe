@@ -17,7 +17,10 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->unsignedBigInteger('file_id');
             $table->foreign('file_id')->references('id')->on('files')->cascadeOnDelete();
-            $table->string('status');
+            $table->boolean('status');
+            $table->string('type');
+            $table->bigInteger('size');
+            $table->integer('Version_number');
             $table->date('date');
             $table->timestamps();
         });

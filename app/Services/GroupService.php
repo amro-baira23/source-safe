@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Resources\JoinRequestsResource;
 use App\Models\Group;
 use App\Models\Perm;
 use Illuminate\Support\Facades\Storage;
@@ -29,7 +30,7 @@ public function store_group(Request $request): array
 
     public function index_group(): array
     {
-        $groups = Group::query()->get()->all();
+        $groups = Group::all();
 
         if (!is_null($groups) && !empty($groups)) {
             $message = "all the groups";
@@ -44,7 +45,7 @@ public function store_group(Request $request): array
 
     public function show_group($id): array
     {
-        $group = Group::query()->find($id);
+        $group = Group::find($id);
 
         if (!is_null($group) && !empty($group)) {
             $message = "successfuly";
@@ -94,6 +95,17 @@ public function store_group(Request $request): array
             $code = 200;
 
             return ['message' => $message, 'code' => $code];
+        }
+
+        public function getJoinRequests($group) : array {
+            
+            $requests = $group->users()->where("approved",false)->get();
+
+            $message = "Join requests been restored";
+            $code = 200;
+
+            return ['requests' => JoinRequestsResource::collection($requests),'message' => $message, 'code' => $code];
+            
         }
 
         public function approveMember($groupId, $userId): array

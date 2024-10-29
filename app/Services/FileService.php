@@ -66,6 +66,15 @@ public function store_file(Request $request): array
 
     }
 
+
+    public function download($request){
+        $file = $request->file;
+        $group = $request->group;
+        $last_version = $request->version ?? $file->locks()->orderBy("created_at")->first();
+        $file_name = "app/projects_files/" . $group->name . $group->id . "/{$file->path}__{$last_version->Version_number}.{$last_version->type}";
+        return storage_path($file_name);
+    } 
+
     
 
 }

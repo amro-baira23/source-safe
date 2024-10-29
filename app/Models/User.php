@@ -42,10 +42,7 @@ class User extends Authenticatable
         return $this->hasMany(Lock::class, 'user_id');
     }
 
-    public function versions()
-    {
-        return $this->hasMany(Version::class, 'user_id');
-    }
+   
 
     public function perms()
     {

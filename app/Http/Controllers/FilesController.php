@@ -10,6 +10,7 @@ use App\Services\FileService;
 use App\Http\Responses\Response;
 use App\Models\Group;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 class FilesController extends Controller
 {

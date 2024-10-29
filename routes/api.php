@@ -54,7 +54,6 @@ Route::middleware("auth:sanctum")->controller(FilesController::class)->group(fun
 
 
 Route::middleware("auth:sanctum")->post("/test/{user}",function (Request $request){
-    $file = Storage::allFiles();
-    dump($file);
-    return response()->download(storage_path("app/{$file[5]}"),"newfile.txt");
+    $file = Storage::allFiles("project_files");
+    return response()->download(storage_path("app/{$file[0]}"),"newfile.txt");
 });

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\GroupRequest;
+use App\Http\Resources\GroupResource;
 use App\Http\Responses\Response;
 use App\Models\Group;
 use App\Services\GroupService;
@@ -50,7 +51,7 @@ class GroupsController extends Controller
         $data = [];
         try{
             $data = $this->GroupService->show_group($id);
-            return Response::Success($data['group'],$data['message'],$data['code']);
+            return Response::Success(new GroupResource($data['group']),$data['message'],$data['code']);
         }catch(Throwable $th){
             $message = $th->getMessage();
             return Response::Error($data,$message );

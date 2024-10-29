@@ -24,16 +24,16 @@ class FileRequest extends FormRequest
      */
     public function rules(): array
     {
-
-            return $this->getFileRules();
-
-
+        if($this->is("*files"))
+            return $this->postFileRules();
+        if($this->is("*files/*"))
+            return $this->editFileRules();
     }
 
-    private function getFileRules(): array
+    private function postFileRules(): array
     {
         return [
-            "name" => ["required", "alpha_dash" , ],
+            "name" => ["required", "alpha_dash" , Rule::unique("files","name")->where("group_id",$this->group_id)],
             "group_id" => ["required", "integer" , Rule::exists("groups","id")],
             "path" => ["required", "file"],
 
@@ -43,11 +43,8 @@ class FileRequest extends FormRequest
     private function editFileRules(): array
     {
         return [
-            "name" => ["required", "alpha_dash"],
-            "group_id" => ["required", "integer" , Rule::exists("groups","id")],
-            "path" => ["required", "file"],
-            "type" => ["required", "alpha"]
-
+            "name" => ["alpha_num"],
+            "type" => ["alpha"]
         ];
     }
 

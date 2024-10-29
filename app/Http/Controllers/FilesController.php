@@ -48,7 +48,7 @@ class FilesController extends Controller
         $data = [];
         try {
             $data = $this->FileService->store_file($request);
-            return Response::Success($data['file'], $data['message']);
+            return Response::Success(new FileResource($data['file']), $data['message']);
 
         } catch(Throwable $th){
             $message = $th->getMessage();
@@ -72,10 +72,10 @@ class FilesController extends Controller
      */
     public function edit(FileRequest $request, Group $group, File $file)
     {
-        $file->update([
-            "name" => $request->name,
-            "type" => $request->type
-        ]);
+        $file->update(
+            $request->validated()
+        );
+        return new FileResource($file);
     }
 
     public function download(Request $request,Group $group,File $file){

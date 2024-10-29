@@ -14,7 +14,7 @@ class FileRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->isMember($this->group);
     }
 
     /**
@@ -40,5 +40,15 @@ class FileRequest extends FormRequest
         ];
     }
 
+    private function editFileRules(): array
+    {
+        return [
+            "name" => ["required", "alpha_dash"],
+            "group_id" => ["required", "integer" , Rule::exists("groups","id")],
+            "path" => ["required", "file"],
+            "type" => ["required", "alpha"]
+
+        ];
+    }
 
 }

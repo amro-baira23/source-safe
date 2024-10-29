@@ -36,9 +36,5 @@ class File extends Model
         return $this->hasMany(Lock::class, 'file_id');
     }
 
-    public function versions()
-    {
-        return $this->hasMany(Version::class, 'file_id');
-    }
 
 }

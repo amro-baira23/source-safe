@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Http\Resources\GroupResource;
 use App\Http\Resources\JoinRequestsResource;
 use App\Models\Group;
-use App\Models\Perm;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,8 +20,17 @@ public function store_group(Request $request): array
         'name'=>$request['name'],
         ]);
 
+        $uesrs = User::all();
+
         $group->users()->attach(auth()->id(), ['role' => 'admin', 'approved' => true]);
 
+        foreach ($request->user_ids as $user_id) {
+
+            // if the user is admin -> ignored
+            if ($user_id != auth()->id()) {
+                $group->users()->attach($user_id, ['role' => 'member', 'approved' => true]);
+            }
+        }
 
         return [
             'group' => $group,
@@ -99,14 +108,14 @@ public function store_group(Request $request): array
         }
 
         public function getJoinRequests($group) : array {
-            
+
             $requests = $group->users()->where("approved",false)->get();
 
             $message = "Join requests been restored";
             $code = 200;
 
             return ['requests' => JoinRequestsResource::collection($requests),'message' => $message, 'code' => $code];
-            
+
         }
 
         public function approveMember($groupId, $userId): array
@@ -117,6 +126,7 @@ public function store_group(Request $request): array
             if (!$admin) {
                 $message = "Only the admin can approve members";
                 $code = 403;
+                return ['message' => $message, 'code' => $code];
             }
 
             $group->users()->updateExistingPivot($userId, ['approved' => true]);
@@ -124,6 +134,28 @@ public function store_group(Request $request): array
                 $code = 200;
 
             return ['message' => $message, 'code' => $code];
+        }
+
+        public function removeUserFromGroup($groupId, $userId): array
+        {
+            $group = Group::find($groupId);
+
+            if (!$group) {
+                return ['message' => 'Group not found', 'code' => 404];
+            }
+
+            if (!$group->users->contains($userId)) {
+                return ['message' => 'User not found in the group', 'code' => 404];
+            }
+
+            $userRole = $group->users()->where('user_id', $userId)->first()->pivot->role;
+            if ($userRole === 'admin') {
+                return ['message' => 'Cannot remove the admin of the group', 'code' => 403];
+            }
+
+            $group->users()->detach($userId);
+
+            return ['message' => 'User removed from the group successfully', 'code' => 200];
         }
 
 }

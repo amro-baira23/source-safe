@@ -22,7 +22,9 @@ class GroupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'=> 'string',
+            'name' => 'required|string|max:255',
+            'user_ids' => 'required|array',
+            'user_ids.*' => 'exists:users,id'
         ];
     }
 }

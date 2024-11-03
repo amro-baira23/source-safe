@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\GroupRequest;
+use App\Http\Resources\GroupResource;
 use App\Http\Responses\Response;
 use App\Models\Group;
 use App\Services\GroupService;
@@ -24,7 +25,7 @@ class GroupsController extends Controller
         $data = [];
         try{
             $data = $this->GroupService->store_group($request);
-            return Response::Success($data['group'],$data['message'] );
+            return Response::Success( new GroupResource($data['group']) , $data['message'] );
 
         }catch(Throwable $th){
             $message = $th->getMessage();
@@ -43,14 +44,14 @@ class GroupsController extends Controller
             $message = $th->getMessage();
             return Response::Error($data,$message );
         }
-     }  
+     }
 
      public function show_group($id): JsonResponse
      {
         $data = [];
         try{
             $data = $this->GroupService->show_group($id);
-            return Response::Success($data['group'],$data['message'],$data['code']);
+            return Response::Success( new GroupResource($data['group']) , $data['message'],$data['code']);
         }catch(Throwable $th){
             $message = $th->getMessage();
             return Response::Error($data,$message );
@@ -61,7 +62,7 @@ class GroupsController extends Controller
         $data = [];
         try{
             $data = $this->GroupService->update_group($request,$id);
-            return Response::Success($data['group'],$data['message'],$data['code']);
+            return Response::Success( new GroupResource($data['group']) , $data['message'],$data['code']);
         }catch(Throwable $th){
             $message = $th->getMessage();
             return Response::Error($data,$message );
@@ -94,6 +95,17 @@ class GroupsController extends Controller
         $data = [];
         try{
             $data = $this->GroupService->approveMember($groupId , $userId);
+            return Response::Success($data['message'],$data['code']);
+        }catch(Throwable $th){
+            $message = $th->getMessage();
+            return Response::Error($data,$message );
+        }
+    }
+
+     public function removeUserFromGroup($groupId , $userId){
+        $data = [];
+        try{
+            $data = $this->GroupService->removeUserFromGroup($groupId , $userId);
             return Response::Success($data['message'],$data['code']);
         }catch(Throwable $th){
             $message = $th->getMessage();

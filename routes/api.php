@@ -41,6 +41,7 @@ Route::middleware("auth:sanctum")->controller(GroupsController::class)->group(fu
     Route::post("/joinGroup/{id}","joinGroup");
     Route::get("/groups/{group}/join_requests","getJoinRequests");
     Route::post("/approveMember/{groupId}/{userId}","approveMember");
+    Route::post("/removeUserFromGroup/{groupId}/{userId}","removeUserFromGroup");
 
 });
 Route::middleware("auth:sanctum")->controller(FilesController::class)->group(function () {

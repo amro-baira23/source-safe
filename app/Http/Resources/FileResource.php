@@ -26,11 +26,11 @@ class FileResource extends JsonResource
     public function getlocks(){
         $res = [];
         if($this->locks){
-            foreach($this->locls  as $lock){
+            foreach($this->locks  as $lock){
                 $res[] = [
-                'user_id' => $lock->title,
-                'file_id' => $lock->description,
-                'status'=>$lock->section_duration,
+                'user_id' => $lock->user_id,
+                'file_id' => $lock->file_id,
+                'status'=>$lock->status,
                 'type'=>$lock->type,
                 'size'=>$lock->size,
                 'version_number'=>$lock->version_number,

@@ -42,16 +42,16 @@ class User extends Authenticatable
         return $this->hasMany(Lock::class, 'user_id');
     }
 
-    public function versions()
-    {
-        return $this->hasMany(Version::class, 'user_id');
-    }
+   
 
     public function perms()
     {
         return $this->hasMany(Perm::class, 'user_id');
     }
 
+    public function isMember($group) : bool{
+        return $this->groups()->where("group_id",$group->id)->exists();
+    }
 
     /**
      * The attributes that should be hidden for serialization.

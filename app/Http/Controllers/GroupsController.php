@@ -51,7 +51,7 @@ class GroupsController extends Controller
         $data = [];
         try{
             $data = $this->GroupService->show_group($id);
-            return Response::Success( new GroupResource($data['group']) , $data['message'],$data['code']);
+            return Response::Success($data['group'],$data['message'],$data['code']);
         }catch(Throwable $th){
             $message = $th->getMessage();
             return Response::Error($data,$message );

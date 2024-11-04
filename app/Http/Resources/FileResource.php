@@ -17,9 +17,11 @@ class FileResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'path' => $this->path,
             'group_id' => $this->group_id,
-            'active' => $this->active,
+            'path' => $this->path,
+            'active' => (bool) $this->active,
+            "updated_at" =>$this->updated_at->format("Y-m-d h:m"),
+            "created_at" =>$this->created_at->format("Y-m-d h:m")
         ];
     }
 

@@ -18,7 +18,7 @@ class FileService
 public function store_file(Request $request): array
     {
 
-        $group = Group::find($request['group_id']);
+        $group = $request->group;
 
         $is_admin = $group->users()->where('user_id', auth()->id())->where('role', 'admin')->first();
 
@@ -32,14 +32,14 @@ public function store_file(Request $request): array
             $file = File::create([
                 'name'=>$request['name'],
                 'path'=>$filename,
-                'group_id'=>$request['group_id'],
+                'group_id'=> $group->id,
                 'active' => 0,
             ]);
 
-            return [
-                'file' => $file,
-                'message' => ' File created successfully by member ',
-            ];
+        return [
+            'file' => $file,
+            'message' => ' File created successfully by member ',
+        ];
         } else {
             $file = File::create([
             'name'=>$request['name'],

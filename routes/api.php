@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FilesController;
 use App\Http\Controllers\GroupsController;
+use App\Http\Controllers\UserController;
 use App\Http\Responses\Response;
 use App\Models\User;
 use Illuminate\Contracts\Cache\Store;
@@ -32,6 +33,9 @@ Route::controller(AuthController::class)->group(function () {
 
 });
 
+Route::middleware("auth:sanctum")->controller(UserController::class)->group(function (){
+    Route::get("/users","index");
+});
 
 
 Route::middleware("auth:sanctum")->controller(GroupsController::class)->group(function () {
@@ -46,15 +50,20 @@ Route::middleware("auth:sanctum")->controller(GroupsController::class)->group(fu
 
 });
 Route::middleware("auth:sanctum")->controller(FilesController::class)->group(function () {
+    //TODO: add filtering
     Route::get("/groups/{group}/files","index");
     Route::get("/groups/{group}/files/{file}","show");
+    //TODO: refactor code and make it take name from file
     Route::post("/groups/{group}/files/","store_file");
+    //TODO: done but maybe useless
     Route::post("/groups/{group}/files/{file}","edit");
+    //TODO: take by version should be edited
     Route::get("/groups/{group}/files/{file}/download","download");
 });
 
 
 Route::middleware("auth:sanctum")->post("/test/{user}",function (Request $request){
-    $file = Storage::allFiles("project_files");
+    $file = Storage::allFiles("projects_files");
+    dump($file);
     return response()->download(storage_path("app/{$file[0]}"),"newfile.txt");
 });

@@ -26,9 +26,9 @@ class FilesController extends Controller
    /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Group $group)
     {
-        $files = File::all();
+        $files = $group->files()->paginate(10);
         return FileResource::collection($files);
     }
 

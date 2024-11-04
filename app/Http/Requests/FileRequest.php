@@ -33,10 +33,8 @@ class FileRequest extends FormRequest
     private function postFileRules(): array
     {
         return [
-            "name" => ["required", "alpha_dash" , Rule::unique("files","name")->where("group_id",$this->group_id)],
-            "group_id" => ["required", "integer" , Rule::exists("groups","id")],
+            "name" => ["required", "alpha_dash" , Rule::unique("files","name")->where("group_id",$this->group->id)],
             "path" => ["required", "file"],
-
         ];
     }
 

@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Models\File;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Validator;
 
 class FileRequest extends FormRequest
 {
@@ -33,7 +35,6 @@ class FileRequest extends FormRequest
     private function postFileRules(): array
     {
         return [
-            "name" => ["required", "alpha_dash" , Rule::unique("files","name")->where("group_id",$this->group->id)],
             "path" => ["required", "file"],
         ];
     }
@@ -44,6 +45,28 @@ class FileRequest extends FormRequest
             "name" => ["alpha_num"],
             "type" => ["alpha"]
         ];
+    }
+
+    public function after(): array
+    {
+        if (!$this->path)
+            return [];
+        return [
+            function (Validator $validator) {
+                if ($this->fileNameIsntUnique()) {
+                    $validator->errors()->add(
+                        'file_name',
+                        'File name should be unique!'
+                    );
+                }
+            }
+        ];
+    }
+    
+    private function fileNameIsntUnique(){
+        return File::where("group_id",$this->group->id)
+                    ->where("name",$this->file("path")->getClientOriginalName())
+                    ->exists();
     }
 
 }

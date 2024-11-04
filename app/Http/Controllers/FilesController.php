@@ -26,8 +26,10 @@ class FilesController extends Controller
    /**
      * Display a listing of the resource.
      */
-    public function index(Group $group)
+    public function index(Request $request, Group $group)
     {
+        if(!$request->user()->isMember($group))
+            return response("Unauthorized",401);
         $files = $group->files()->paginate(10);
         return FileResource::collection($files);
     }

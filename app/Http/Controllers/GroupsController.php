@@ -35,11 +35,11 @@ class GroupsController extends Controller
      }
 
 
-     public function index_group(): JsonResponse
+     public function index_group(Request $request): JsonResponse
      {
         $data = [];
         try{
-            $data = $this->GroupService->index_group();
+            $data = $this->GroupService->index_group($request);
             return Response::Success($data['groups'],$data['message'],$data['code']);
         }catch(Throwable $th){
             $message = $th->getMessage();

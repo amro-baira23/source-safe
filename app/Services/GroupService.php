@@ -38,9 +38,11 @@ public function store_group(Request $request): array
             ];
     }
 
-    public function index_group(): array
+    public function index_group(Request $request): array
     {
-        $groups = Group::all();
+        $groups = Group::whereHas("users",function ($query) use ($request){
+            return $query->where("user_id",$request->user()->id);
+        })->get();
 
         if (!is_null($groups) && !empty($groups)) {
             $message = "all the groups";

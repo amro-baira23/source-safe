@@ -73,15 +73,46 @@ public function store_group(Request $request): array
     {
         $group = Group::find($groupId);
 
+        $user_id = auth()->user()->id;
+
+        $isAdmin = $group->users()->where('user_id', $user_id)->first()->pivot->role;
+
+            if ($isAdmin != 'admin') {
+
+                return ['message' => 'Unauthorized. Only the group admin can access this resource.', 'code' => 403];
+            }
+
+
         if (!is_null($group) && !empty($group)) {
 
             $group->update([
                 'name'=>$request['name'],
             ]);
+
+            if ($request->has('remove_user_ids')) {
+                    foreach ($request->remove_user_ids as $userId) {
+                        $userToRemove = $group->users()->where('user_id', $userId)->first();
+                        if ($userToRemove && $userToRemove->pivot->role !== 'admin') {
+                            $group->users()->detach($userId);
+                        }else{
+                            $message = " Cannot remove the admin of the group , or the user not found in group ";
+                            $code = 403;
+                            return ['group' => $group, 'message' => $message, 'code' => $code];
+                        }
+                    }
+            }
+
+            if ($request->has('add_user_ids')) {
+                foreach ($request->add_user_ids as $userId) {
+                    if (!$group->users->contains($userId)) {
+                        $group->users()->attach($userId, ['role' => 'member', 'approved' => true]);
+                    }
+                }
+            }
             $message = "success update";
             $code = 200;
         } else {
-            $message = "no group";
+            $message = " group not found";
             $code = 404;
         }
 
@@ -140,8 +171,17 @@ public function store_group(Request $request): array
         {
             $group = Group::find($groupId);
 
+            $user_id = auth()->user()->id;
+
             if (!$group) {
                 return ['message' => 'Group not found', 'code' => 404];
+            }
+
+            $isAdmin = $group->users()->where('user_id', $user_id)->first()->pivot->role;
+
+            if ($isAdmin != 'admin') {
+
+                return ['message' => 'Unauthorized. Only the group admin can access this resource.', 'code' => 403];
             }
 
             if (!$group->users->contains($userId)) {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\GroupRequest;
+use App\Http\Requests\UpdateGroupRequest;
 use App\Http\Resources\GroupResource;
 use App\Http\Responses\Response;
 use App\Models\Group;
@@ -51,13 +52,13 @@ class GroupsController extends Controller
         $data = [];
         try{
             $data = $this->GroupService->show_group($id);
-            return Response::Success($data['group'],$data['message'],$data['code']);
+            return Response::Success(new GroupResource($data['group']),$data['message'],$data['code']);
         }catch(Throwable $th){
             $message = $th->getMessage();
             return Response::Error($data,$message );
         }
      }
-     public function update_group(GroupRequest $request,$id): JsonResponse
+     public function update_group(UpdateGroupRequest $request,$id): JsonResponse
      {
         $data = [];
         try{

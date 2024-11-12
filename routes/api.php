@@ -37,18 +37,38 @@ Route::middleware("auth:sanctum")->controller(UserController::class)->group(func
     Route::get("/users","index");
 });
 
+// groups  //
 
-Route::middleware("auth:sanctum")->controller(GroupsController::class)->group(function () {
-    Route::post("/store_group","store_group");
-    Route::get("/show_group/{id}","show_group");
-    Route::get("/index_group","index_group");
+Route::middleware(['auth:sanctum', 'GroupAdmin'])->controller(GroupsController::class)->group(function () {
     Route::post("/update_group/{id}","update_group");
-    Route::post("/joinGroup/{id}","joinGroup");
-    Route::get("/groups/{group}/join_requests","getJoinRequests");
-    Route::post("/approveMember/{groupId}/{userId}","approveMember");
+    // Route::post("/joinGroup/{id}","joinGroup");
+    // Route::get("/groups/{group}/join_requests","getJoinRequests");
+    // Route::post("/approveMember/{groupId}/{userId}","approveMember");
     Route::post("/removeUserFromGroup/{groupId}/{userId}","removeUserFromGroup");
+});
+
+Route::middleware(['auth:sanctum', 'member_OR_admin'])->controller(GroupsController::class)->group(function () {
+    Route::get("/show_group/{id}","show_group");
+});
+
+
+Route::middleware('auth:sanctum')->controller(GroupsController::class)->group(function () {
+    Route::post("/store_group","store_group");
+    Route::get("/index_group","index_group");
 
 });
+
+// files  //
+
+Route::middleware(['auth:sanctum', 'member_OR_admin'])->controller(FilesController::class)->group(function () {
+
+    Route::post("/groups/{groupId}/files/check_in","check_in");
+
+    Route::post("/groups/{groupId}/files/check_out","check_out");
+
+    Route::get("/groups/{groupId}/files/{fileId}/versions","getAvailableFilesWithVersions");
+});
+
 Route::middleware("auth:sanctum")->controller(FilesController::class)->group(function () {
     //TODO: add filtering
     Route::get("/groups/{group}/files","index");

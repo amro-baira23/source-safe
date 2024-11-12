@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Check_inRequest;
+use App\Http\Requests\Check_outRequest;
 use App\Http\Requests\FileRequest;
 use App\Http\Resources\FileResource;
 use Illuminate\Http\Request;
@@ -14,7 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use Throwable;
 class FilesController extends Controller
 {
-   
+
      private FileService $FileService ;
 
     public function __construct(FileService $FileService)
@@ -81,7 +83,7 @@ class FilesController extends Controller
     }
 
     public function download(Request $request,Group $group,File $file){
-        
+
         $data = [];
         try {
             $data = $this->FileService->download($request);
@@ -92,6 +94,48 @@ class FilesController extends Controller
             return Response::Error($data,$message );
         }
 
+    }
+
+    public function check_in(Check_inRequest $request): JsonResponse
+    {
+        $data = [];
+        try {
+            $data = $this->FileService->check_in($request);
+            return Response::Success($data['files'], $data['message']);
+
+        } catch(Throwable $th){
+            $message = $th->getMessage();
+            return Response::Error($data,$message );
+        }
+        //  return new  FileResource($file);
+    }
+
+    public function check_out(Check_outRequest $request): JsonResponse
+    {
+        $data = [];
+        try {
+            $data = $this->FileService->check_out($request);
+            return Response::Success($data['files'], $data['message']);
+
+        } catch(Throwable $th){
+            $message = $th->getMessage();
+            return Response::Error($data,$message );
+        }
+        //  return new  FileResource($file);
+    }
+
+    public function getAvailableFilesWithVersions($file): JsonResponse
+    {
+        $data = [];
+        try {
+            $data = $this->FileService->getAvailableFilesWithVersions($file);
+            return Response::Success($data['files'], $data['message']);
+
+        } catch(Throwable $th){
+            $message = $th->getMessage();
+            return Response::Error($data,$message );
+        }
+        //  return new  FileResource($file);
     }
 
 }

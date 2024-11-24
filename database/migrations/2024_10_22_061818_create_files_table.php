@@ -16,8 +16,9 @@ return new class extends Migration
             $table->unsignedBigInteger('group_id');
             $table->foreign('group_id')->references('id')->on('groups')->cascadeOnDelete();
             $table->string('name');
+            $table->boolean('status')->default(0);
             $table->string('path');
-            $table->boolean("active")->default(0);  
+            $table->boolean("active")->default(0);
             $table->timestamps();
         });
     }

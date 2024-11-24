@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Group;
+use App\Models\User;
 use Google\Client;
 use Google_Client;
 use Illuminate\Http\Request;
@@ -16,7 +18,7 @@ class NotificationController extends Controller
             'fcm_token' => 'required|string',
         ]);
 
-        $request->user()->update(['fcm_token' => $request->fcm_token]);
+        User::find($request->user_id)->update(['fcm_token' => $request->fcm_token]);
 
         return response()->json(['message' => 'Device token updated successfully']);
     }
@@ -38,9 +40,9 @@ class NotificationController extends Controller
 
         $title = $request->title;
         $description = $request->body;
-        $projectId = config('services.fcm.project_id'); # INSERT COPIED PROJECT ID
+        $projectId = config('services.fcm.project_id'); 
 
-        $credentialsFilePath = Storage::path('app/json/file.json');
+        $credentialsFilePath = Storage::path('json/source-safe-4a69e-firebase-adminsdk-vrx8l-daaeaf6cf5.json');
         $client = new Client();
         $client->setAuthConfig($credentialsFilePath);
         $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
@@ -64,7 +66,8 @@ class NotificationController extends Controller
             ]
         ];
         $payload = json_encode($data);
-
+        dd($headers);
+        dd($payload);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send");
         curl_setopt($ch, CURLOPT_POST, true);
@@ -72,7 +75,7 @@ class NotificationController extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_VERBOSE, true); // Enable verbose output for debugging
+        curl_setopt($ch, CURLOPT_VERBOSE, true); 
         $response = curl_exec($ch);
         $err = curl_error($ch);
         curl_close($ch);

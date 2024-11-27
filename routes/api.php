@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FilesController;
 use App\Http\Controllers\GroupsController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
 use App\Http\Responses\Response;
 use App\Models\User;
@@ -80,6 +81,12 @@ Route::middleware("auth:sanctum")->controller(FilesController::class)->group(fun
     //TODO: take by version should be edited
     Route::get("/groups/{group}/files/{file}/download","download");
 });
+
+Route::middleware("auth:sanctum")->controller(NotificationController::class)->group(function () {
+    Route::post("fcm_token","updateDeviceToken");
+    Route::post("notify","sendFcmNotification");
+});
+
 
 
 Route::middleware("auth:sanctum")->post("/test/{user}",function (Request $request){

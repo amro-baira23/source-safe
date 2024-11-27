@@ -18,6 +18,9 @@ class MemberGroupMiddleware
     {
         $groupId = $request->route('groupId');
          $group = Group::find($groupId);
+         if (!$group) {
+            return response()->json(['message' => 'Group not found.'], 404);
+        }
          $user_id = auth()->user()->id;
 
          $userRole = $group->users()->where('user_id', $user_id)->first()->pivot->role;
@@ -25,7 +28,7 @@ class MemberGroupMiddleware
          if ($userRole === 'member' || $userRole === 'admin') {
             return $next($request);
          }
-         
+
          return response()->json(['message' => 'Unauthorized. Only the group members can access this resource.'], 403);
 
     }

@@ -22,10 +22,11 @@ class Check_inRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file_ids' => 'required|array|min:1',
-            'file_ids.*' => 'integer|exists:files,id',
-            'versions' => 'required|array',
-            'versions.*' => 'integer|min:1',
+
+        'files' => 'required|array',
+        'files.*.file_id' => 'required|integer|exists:files,id',
+        'files.*.version' => 'required|integer',
+
 
            // 'version' => 'required|integer|exists:locks,Version_number',
 

@@ -95,6 +95,7 @@ public function store_group(Request $request): array
                     foreach ($request->remove_user_ids as $userId) {
                         $userToRemove = $group->users()->where('user_id', $userId)->first();
                         if ($userToRemove && $userToRemove->pivot->role !== 'admin') {
+
                             $group->users()->detach($userId);
                         }else{
                             $message = " Cannot remove the admin of the group , or the user not found in group ";

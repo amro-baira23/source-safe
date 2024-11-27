@@ -40,7 +40,7 @@ Route::middleware("auth:sanctum")->controller(UserController::class)->group(func
 // groups  //
 
 Route::middleware(['auth:sanctum', 'GroupAdmin'])->controller(GroupsController::class)->group(function () {
-    Route::post("/update_group/{id}","update_group");
+    Route::post("/update_group/{groupId}","update_group");
     // Route::post("/joinGroup/{id}","joinGroup");
     // Route::get("/groups/{group}/join_requests","getJoinRequests");
     // Route::post("/approveMember/{groupId}/{userId}","approveMember");

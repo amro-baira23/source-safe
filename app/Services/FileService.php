@@ -6,10 +6,12 @@ use App\Http\Requests\FileRequest;
 use App\Models\File;
 use App\Models\Lock;
 use App\Models\Group;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use ZipArchive;
 
 use Illuminate\Support\Facades\URL;
 
@@ -77,162 +79,232 @@ public function store_file(Request $request): array
     }
 
 
-    public function check_in(Request $request): array
+    public function check_in(array $files): array
     {
-        $fileIds = $request->file_ids;
         $userId = auth()->id();
-        $selectedVersions = $request->input('versions');
+        $fileIds = collect($files)->pluck('file_id');
+        $downloadedFilePaths = [];
 
-        foreach ($fileIds as $fileId) {
-            $version = $selectedVersions[$fileId] ?? null;
-            if (!Lock::where('file_id', $fileId)->where('Version_number', $version)->exists()) {
-                return ['message' => "The specified version {$version} does not exist for file with ID {$fileId}"];
-            }
-        }
-
-        $files = File::whereIn('id', $fileIds)
+        try {
+            DB::transaction(function () use ($files, $fileIds, $userId, &$downloadedFilePaths) {
+                $fileRecords = File::whereIn('id', $fileIds)
                     ->where('status', 0)
                     ->where('active', 1)
+                    ->lockForUpdate()
                     ->get();
 
-        if ($files->count() !== count($fileIds)) {
+                if ($fileRecords->count() !== count($fileIds)) {
+                    throw new \Exception('One or more files are either reserved or not approved by admin.');
+                }
+
+                foreach ($files as $file) {
+                    $fileId = $file['file_id'];
+                    $version = $file['version'];
+
+                    // Find the specific file and version
+                    $fileRecord = $fileRecords->where('id', $fileId)->first();
+                    $versionRecord = Lock::where('file_id', $fileId)
+                        ->where('Version_number', $version)
+                        ->first();
+
+                    if (!$versionRecord) {
+                        throw new \Exception("Requested version {$version} does not exist for file {$fileRecord->name}.");
+                    }
+
+                    $storagePath = "projects_files/" . ($fileRecord->group->name . $fileRecord->group->id) . "/" . $fileRecord->path . "__" . $version . '.' . $versionRecord->type;
+
+                    if (Storage::exists($storagePath)) {
+                        $downloadedFilePaths[] = $storagePath;
+                    }
+
+                    $fileRecord->status = 1;
+                    $fileRecord->save();
+
+                    Lock::create([
+                        'user_id' => $userId,
+                        'file_id' => $fileId,
+                        'status' => 1,
+                        'type' => $versionRecord->type,
+                        'size' => $versionRecord->size,
+                        'Version_number' => $version,
+                        'date' => now(),
+                    ]);
+                }
+            });
+        } catch (\Exception $e) {
             return [
+                'message' => $e->getMessage(),
                 'files' => null,
-                'message' => 'One or more files are either reserved or not approved by admin'
+                'zip_path' => null,
             ];
         }
 
-        $downloadedFiles = [];
-        foreach ($files as $file) {
-            $requestedVersion = $selectedVersions[$file->id] ?? null;
+        $zipFileName = 'files_' . now()->timestamp . '.zip';
+        $zipFilePath = $this->downloadFilesAsZip($downloadedFilePaths, $zipFileName);
 
-            $versionRecord = Lock::where('file_id', $file->id)
-                                ->where('Version_number', $requestedVersion)
-                                ->first();
+        return [
+            'message' => 'Files downloaded successfully',
+            'zip_path' => $zipFilePath,
+        ];
+    }
 
-            if (!$versionRecord) {
-                return [
-                    'files' => null,
-                    'message' => "Requested version {$requestedVersion} does not exist for file {$file->name}"
-            ];
+
+    public function downloadFilesAsZip(array $filePaths, string $zipFileName): string
+    {
+        $zipPath = storage_path("app/Downloads/{$zipFileName}");
+
+        $zip = new ZipArchive();
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+            foreach ($filePaths as $filePath) {
+                if (Storage::exists($filePath)) {
+                    $zip->addFile(Storage::path($filePath), basename($filePath));
+                }
             }
+            $zip->close();
+        } else {
+            throw new \Exception("Could not create ZIP file.");
+        }
 
-            $storagePath = "projects_files/" . ($file->group->name . $file->group->id) . "/" . $file->path . "__" . $requestedVersion . '.' . $versionRecord->type;
+        return $zipPath;
+    }
 
-            $file->status = 1;
-            $file->save();
+    public function check_out(Request $request): array
+    {
+        $fileId = $request->input('file_id');
+        $userId = auth()->id();
+        $uploadedFile = $request->file('file');
+
+        $file = File::where('id', $fileId)->where('status', 1)->first();
+        if (!$file) {
+            return [
+                'files' => null,
+                'message' => 'The selected file is either not reserved or not active',
+            ];
+        }
+
+
+        $lastLock = Lock::where('file_id', $file->id)->latest()->first(); //  the same user check_in
+        if (!$lastLock || $lastLock->user_id !== $userId || $lastLock->status !== 1) {
+            return [
+                'files' => null,
+                'message' => 'You do not have permission to check out this file',
+            ];
+        }
+
+        // التحقق من أن اسم الملف المرفوع يطابق اسم الملف في النظام
+        $fileBaseName = pathinfo($file->name, PATHINFO_FILENAME);
+        if (pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME) !== $fileBaseName) {
+            return [
+                'files' => null,
+                'message' => "Uploaded file name does not match the file name in the system ({$file->name})",
+            ];
+        }
+
+        $file->status = 0;
+        $file->save();
 
         Lock::create([
             'user_id' => $userId,
             'file_id' => $file->id,
-            'status' => 1,  // check_in status
-            'type'=> $versionRecord->type,
-            'size' => $versionRecord->size,
-            'Version_number' => $requestedVersion,
+            'status' => 0, // check-out status
+            'type' => $uploadedFile->extension(),
+            'size' => $uploadedFile->getSize(),
+            'Version_number' => $lastLock->Version_number + 1,
             'date' => now(),
         ]);
 
-            $downloadedFiles[] = $storagePath;
+        $storagePath = "projects_files/" . ($file->group->name . $file->group->id);
+        $uploadedFile->storeAs($storagePath, $file->path . '.' . $uploadedFile->extension());
+
+        return [
+            'files' => [$file->name],
+            'message' => 'File successfully checked out',
+        ];
+    }
+
+    public function getAvailableFilesWithVersions($groupId, $fileId)
+    {
+        $group = Group::find($groupId);
+
+        if (!$group) {
+            return [
+                'versions' => null,
+                'message' => 'Group not found.',
+            ];
+        }
+
+        $file = File::where('id', $fileId)
+                    ->where('group_id', $groupId)
+                    ->where('active', 1)
+                    ->first();
+
+        if (!$file) {
+            return [
+                'versions' => null,
+                'message' => 'File not found or not active in this group.',
+            ];
+        }
+
+        $versions = $file->locks()->orderBy('Version_number', 'desc')->get();
+
+        $uniqueVersions = $versions->unique('Version_number');
+
+        if ($uniqueVersions->isEmpty()) {
+            return [
+                'versions' => null,
+                'message' => 'No versions found for this file',
+            ];
         }
 
         return [
-            'message' => 'Files downloaded successfully',
-            'files' => $downloadedFiles,
+            'versions' => $uniqueVersions,
+            'message' => 'Available versions for the specified file',
         ];
     }
 
 
-    public function check_out(Request $request): array
+    public function getGroupFiles(Group  $group): array
     {
-
-        $fileIds = $request->file_ids;
-        $userId = auth()->id();
-        $uploadedFiles = $request->file('files');
-        $files = File::whereIn('id', $fileIds)->where('status', 1)->get();
-
-        $filesName = [];
-        foreach ($files as $file) {
-            $lastLock = Lock::where('file_id', $file->id)->latest()->first();
-
-            if (!$lastLock || $lastLock->user_id !== $userId || $lastLock->status !== 1) {
-                return [
-                    'files' =>  null,
-                    'message' => 'One or more files are not checked in by this user'];
-            }
-
-            $fileBaseName = pathinfo($file->name, PATHINFO_FILENAME);
-
-            //  search in uploadfiles where the name is same in the main files
-            $uploadedFile = collect($uploadedFiles)->first(function ($upload) use ($fileBaseName) {
-                return pathinfo($upload->getClientOriginalName(), PATHINFO_FILENAME) === $fileBaseName;
-            });
-            if (!$uploadedFile) {
-                return [
-                    'files' =>  null,
-                    'message' => "Uploaded file name does not match file {$file->name} in the system"
-                ];
-            }
-
-            $file->status = 0;
-            $file->save();
-
-            Lock::create([
-                'user_id' => $userId,
-                'file_id' => $file->id,
-                'status' => 0,  // check_out status
-                'type' => $uploadedFile->extension(),
-                'size' => $uploadedFile->getSize(),
-                'Version_number' => $lastLock->Version_number + 1,
-                'date' => now(),
-            ]);
-
-            $storagePath = "projects_files/" . ($file->group->name . $file->group->id);
-            $uploadedFile->storeAs($storagePath, $file->path . '.' . $uploadedFile->extension());
-
-            $filesName [] = $file->name;
-        }
+        $files =  $group->files()->get();
 
         return [
-            'files' => $filesName ,
-            'message' => 'Files successfully checked out'
+            'files' => $files,
+            'message' => 'This all files for this group',
         ];
     }
 
 
-    public function getAvailableFilesWithVersions($fileId)
+    public function getAllFiles()
+    {
+        return File::all();
+    }
+
+
+    public function deleteFileWithLocks(File $file): array
     {
 
-        // $filesWithVersions = File::with(['locks' => function($query) {
-        //     $query->orderBy('Version_number', 'desc');
-        // }])->where('active', 1)->get();
+        DB::transaction(function () use ($file) {
+            $file->locks()->delete();
+            $file->delete();
+        });
 
-        // return [
-        //     'files' => $filesWithVersions ,
-        //     'message' => 'all active files with versions',
-        // ];
-
-    $file = File::with(['locks' => function ($query) {
-        $query->select('file_id', 'Version_number', 'type')
-            ->orderBy('Version_number', 'desc')
-            ->distinct('Version_number');
-    }])
-    ->where('id', $fileId)
-    ->where('active', 1)
-    ->first();
-
-    // التحقق إذا كان الملف موجودًا
-    if (!$file) {
         return [
-            'files' => null,
-            'message' => 'File not found or not active',
+            'file' => $file,
+            'message' => 'File and its locks deleted successfully.'
         ];
     }
 
-    return [
-        'file' => $file,
-        'message' => 'Available versions for the specified file',
-    ];
+
+    public function softDeleteFile(File $file): array
+    {
+        $file->delete();
+
+        return [
+            'file' => $file,
+            'message' => 'File soft deleted successfully.'
+        ];
     }
+
 
 
 

@@ -39,18 +39,25 @@ Route::middleware("jwt_auth:access")->controller(UserController::class)->group(f
     Route::get("/users","index");
 });
 
-// groups  //
+Route::middleware(['auth:sanctum', 'SuperAdmin'])->controller(UserController::class)->group(function () {
+    Route::get('/users', 'getAllUsers'); // Get all users
+    Route::post('/users/{user}', 'deleteUser'); // Delete a user with soft delete
+    Route::get('/users/{user}/groups', 'getUserGroups'); // Get all groups for a user
+});
 
-Route::middleware(['jwt_auth:access', 'GroupAdmin'])->controller(GroupsController::class)->group(function () {
-    Route::post("/update_group/{id}","update_group");
+
+// groups  // ************************************
+
+Route::middleware(["jwt_auth:access", 'GroupAdmin'])->controller(GroupsController::class)->group(function () {
+    Route::post("/update_group/{groupId}","update_group");
     // Route::post("/joinGroup/{id}","joinGroup");
     // Route::get("/groups/{group}/join_requests","getJoinRequests");
     // Route::post("/approveMember/{groupId}/{userId}","approveMember");
     Route::post("/removeUserFromGroup/{groupId}/{userId}","removeUserFromGroup");
 });
 
-Route::middleware(['jwt_auth:access', 'member_OR_admin'])->controller(GroupsController::class)->group(function () {
-    Route::get("/show_group/{id}","show_group");
+Route::middleware(['jwt_auth:', 'member_OR_admin'])->controller(GroupsController::class)->group(function () {
+    Route::get("/show_group/{groupId}","show_group");
 });
 
 
@@ -59,6 +66,15 @@ Route::middleware('jwt_auth:access')->controller(GroupsController::class)->group
     Route::get("/index_group","index_group");
 
 });
+
+
+Route::middleware(['jwt_auth:access', 'SuperAdmin'])->controller(GroupsController::class)->group(function () {
+    Route::get('/groups','getAllGroups');
+    Route::post('/groups/{group}/delete_with_files','deleteGroupWithFiles');
+    Route::post('/groups/{group}/soft_delete','softDeleteGroup');
+});
+
+// files  // *********************************
 
 Route::middleware(['jwt_auth:access', 'member_OR_admin'])->controller(FilesController::class)->group(function () {
 
@@ -81,11 +97,27 @@ Route::middleware("jwt_auth:access")->controller(FilesController::class)->group(
     Route::get("/groups/{group}/files/{file}/download","download");
 });
 
+Route::middleware(['jwt_auth:access', 'SuperAdmin'])->controller(FilesController::class)->group(function () {
+    Route::get('/groups/{group}/files','getGroupFiles');
+    Route::get('/files','getAllFiles');
+    Route::post('/files/{file}/delete_with_locks','deleteFileWithLocks');
+    Route::post('/files/{file}/soft_delete','softDeleteFile');
+});
+
+
+
+// notifications  // ***********************************
+
 Route::middleware("jwt_auth:access")->controller(NotificationController::class)->group(function () {
     Route::post("fcm_token","updateDeviceToken");
     Route::post("notify","sendFcmNotification");
 });
 
-Route::middleware("jwt_auth:access")->post("/test/{user}",function (Request $request){    
-    return "hello world";
+
+
+
+Route::middleware("jwt_auth:access")->post("/test/{user}",function (Request $request){
+    $file = Storage::allFiles("projects_files");
+    dump($file);
+    return response()->download(storage_path("app/{$file[0]}"),"newfile.txt");
 });

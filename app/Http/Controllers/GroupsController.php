@@ -47,11 +47,11 @@ class GroupsController extends Controller
         }
      }
 
-     public function show_group($id): JsonResponse
+     public function show_group($groupId): JsonResponse
      {
         $data = [];
         try{
-            $data = $this->GroupService->show_group($id);
+            $data = $this->GroupService->show_group($groupId);
             return Response::Success(new GroupResource($data['group']),$data['message'],$data['code']);
         }catch(Throwable $th){
             $message = $th->getMessage();
@@ -111,6 +111,32 @@ class GroupsController extends Controller
         }catch(Throwable $th){
             $message = $th->getMessage();
             return Response::Error($data,$message );
+        }
+    }
+
+    public function getAllGroups()
+    {
+        $files = $this->GroupService->getAllGroups();
+        return GroupResource::collection($files);
+    }
+
+    public function deleteGroupWithFiles(Group $group): JsonResponse
+    {
+        try {
+            $result = $this->GroupService->deleteGroupWithFiles($group);
+            return Response::Success([], $result['message']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage());
+        }
+    }
+
+    public function softDeleteGroup(Group $group): JsonResponse
+    {
+        try {
+            $result = $this->GroupService->softDeleteGroup($group);
+            return Response::Success([], $result['message']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage());
         }
     }
 }

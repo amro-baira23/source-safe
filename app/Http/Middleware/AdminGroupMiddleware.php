@@ -20,6 +20,9 @@ class AdminGroupMiddleware
     {
          $groupId = $request->route('groupId');
          $group = Group::find($groupId);
+         if (!$group) {
+             return response()->json(['message' => 'Group not found.'], 404);
+         }
          $user_id = auth()->user()->id;
 
          $isAdmin = $group->users()->where('user_id', $user_id)->first()->pivot->role;

@@ -96,18 +96,23 @@ class FilesController extends Controller
 
     }
 
+
+
     public function check_in(Check_inRequest $request): JsonResponse
     {
-        $data = [];
+        $result = [];
         try {
-            $data = $this->FileService->check_in($request);
-            return Response::Success($data['files'], $data['message']);
+            $result = $this->FileService->check_in($request->input('files'));
 
-        } catch(Throwable $th){
+            if (!empty($result['zip_path'])) {
+                return Response::Success([], 'Download will start. Please check your browser.');
+            }
+
+            return Response::Success($result['files'], $result['message']);
+        } catch (Throwable $th) {
             $message = $th->getMessage();
-            return Response::Error($data,$message );
+            return Response::Error($result, $message);
         }
-        //  return new  FileResource($file);
     }
 
     public function check_out(Check_outRequest $request): JsonResponse
@@ -124,18 +129,56 @@ class FilesController extends Controller
         //  return new  FileResource($file);
     }
 
-    public function getAvailableFilesWithVersions($file): JsonResponse
+    public function getAvailableFilesWithVersions($groupId, $fileId): JsonResponse
     {
         $data = [];
         try {
-            $data = $this->FileService->getAvailableFilesWithVersions($file);
-            return Response::Success($data['files'], $data['message']);
+            $data = $this->FileService->getAvailableFilesWithVersions($groupId , $fileId);
+            return Response::Success($data['versions'], $data['message']);
 
-        } catch(Throwable $th){
+        } catch (Throwable $th) {
             $message = $th->getMessage();
-            return Response::Error($data,$message );
+            return Response::Error($data, $message);
         }
-        //  return new  FileResource($file);
+    }
+
+    public function getGroupFiles(Group  $group)
+    {
+        $data =[];
+        try {
+            $data = $this->FileService->getGroupFiles($group);
+            return Response::Success(FileResource::collection($data['files']), $data['message']);
+        } catch (Throwable $th) {
+            return Response::Error($data, $th->getMessage());
+        }
+    }
+
+    public function getAllFiles()
+    {
+        $files = $this->FileService->getAllFiles();
+        return FileResource::collection($files);
+    }
+
+    public function deleteFileWithLocks(File $file): JsonResponse
+    {
+
+        try {
+            $result = $this->FileService->deleteFileWithLocks($file);
+            return Response::Success([], $result['message']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage());
+        }
+
+    }
+
+    public function softDeleteFile(File $file): JsonResponse
+    {
+        try {
+            $result = $this->FileService->softDeleteFile($file);
+            return Response::Success($result['file'], $result['message']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage());
+        }
     }
 
 }

@@ -8,6 +8,7 @@ use App\Models\Group;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
 
@@ -55,9 +56,9 @@ public function store_group(Request $request): array
         return ['groups' => GroupResource::collection($groups), 'message' => $message, 'code' => $code];
     }
 
-    public function show_group($id): array
+    public function show_group($groupId): array
     {
-        $group = Group::find($id);
+        $group = Group::find($groupId);
 
         if (!is_null($group) && !empty($group)) {
             $message = "successfuly";
@@ -95,6 +96,7 @@ public function store_group(Request $request): array
                     foreach ($request->remove_user_ids as $userId) {
                         $userToRemove = $group->users()->where('user_id', $userId)->first();
                         if ($userToRemove && $userToRemove->pivot->role !== 'admin') {
+
                             $group->users()->detach($userId);
                         }else{
                             $message = " Cannot remove the admin of the group , or the user not found in group ";
@@ -199,6 +201,36 @@ public function store_group(Request $request): array
 
             return ['message' => 'User removed from the group successfully', 'code' => 200];
         }
+
+    public function getAllGroups()
+    {
+        return Group::all();
+    }
+
+
+    public function deleteGroupWithFiles(Group $group): array
+    {
+        DB::transaction(function () use ($group) {
+            $group->files()->delete();
+            $group->delete();
+        });
+
+        return [
+            'group' => $group,
+            'message' => 'Group and its files deleted successfully.'
+        ];
+    }
+
+
+    public function softDeleteGroup(Group $group): array
+    {
+        $group->delete();
+
+        return [
+            'group' => $group,
+            'message' => 'Group soft deleted successfully.'
+        ];
+    }
 
 }
 

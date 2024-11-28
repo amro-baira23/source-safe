@@ -22,10 +22,8 @@ class Check_outRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file_ids' => 'required|array|min:1',
-            'file_ids.*' => 'integer|exists:files,id',
-            'files' => 'required|array',
-            'files.*' => 'file',
+            'file_id' => 'required|integer|exists:files,id',
+            'file' => 'required|file',
         ];
     }
 }

@@ -31,7 +31,7 @@ class FilesController extends Controller
     public function index(Request $request, Group $group)
     {
         if(!$request->user()->isMember($group))
-            return response("Unauthorized",401);
+            return response(["message" => "user is not member of this group"],401);
         $files = $group->files()->paginate(10);
         return FileResource::collection($files);
     }

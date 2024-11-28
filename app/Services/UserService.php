@@ -31,30 +31,30 @@ class UserService
         return [
             'user' => $user,
             'message' => $message,
-            ];
+        ];
     }
 
     public function login($request): array
     {
-        $user = User::query()->where('username',$request['username'])->first();
+        if(!Auth::attempt($credentials = $request->only(['username', 'password']))) {
+            return [ 'message' => 'incorrect password', 'code' => 401];
+        }   
+        $user = $this->appendRolesAndPermissions($request->user());
+        $user['access_token'] = auth()->setTTL(90)->claims(['type' => 'access'])->attempt($credentials);
+        $user['refresh_token'] = auth()->setTTL(60 * 24 *2)->claims(['type' => 'refresh'])->attempt($credentials);
 
-        if(!is_null($user)){
+        return ['user' => $user , 'message' => "user logged in successfully" , 'code' => 200];
+    }
 
-            if(!Auth::attempt($request->only(['username', 'password']))) {
-                $message = 'username and password are not in our records';
-                $code = 401;
-            }else{
-                $user = $this->appendRolesAndPermissions($user);
-                $user['token'] = $user->createToken('token')->plainTextToken;
-                $message = 'user logged in successfully!';
-                $code = 200;
-            }
-        }else{
-            $message = 'user not found';
-            $code = 404;
-        }
-
-        return ['user' => $user , 'message' => $message , 'code' => $code];
+    public function refresh(){
+        auth()->invalidate();
+        $data["access_token"] = auth()->setTTL(90)->claims(["type" => "access"])->tokenById(auth()->id());
+        $data["refresh_token"] = auth()->setTTL(60 * 24 * 2)->claims(["type" => "refresh"])->tokenById(auth()->id());
+        return [
+            "token" => $data,
+            "message" => "token successfully refreshed",
+            "code" => 200
+        ];
     }
 
     public function logout(): array
@@ -64,7 +64,7 @@ class UserService
         if (!is_null($user)) {
 
             if (Auth::check()) {
-                Auth::user()->currentAccessToken()->delete();
+                auth()->invalidate();
                 $message = 'Logged out successfully!';
                 $code = 200;
             } else {

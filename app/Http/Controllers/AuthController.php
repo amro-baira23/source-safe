@@ -8,7 +8,9 @@ use App\Services\UserService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Responses\Response;
+use Google\Service\Gmail\Thread;
 use Illuminate\Http\JsonResponse;
+use LDAP\Result;
 use Throwable;
 
 
@@ -44,6 +46,17 @@ class AuthController extends Controller
              return Response::Error($data,$message );
          }
      }
+
+     public function refresh(){
+        try {
+            $data = $this->userService->refresh();
+            return Response::Success($data['token'],$data['message'],$data['code']);
+        } catch(Throwable $th){
+            $message = $th->getMessage();
+            return Response::Error([],$message );
+        }
+     }
+     
 
     public function logout(): JsonResponse
     {

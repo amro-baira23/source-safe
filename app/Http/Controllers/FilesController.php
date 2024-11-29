@@ -98,14 +98,18 @@ class FilesController extends Controller
 
 
 
-    public function check_in(Check_inRequest $request): JsonResponse
+    public function check_in(Check_inRequest $request)
     {
         $result = [];
         try {
             $result = $this->FileService->check_in($request->input('files'));
 
             if (!empty($result['zip_path'])) {
-                return Response::Success([], 'Download will start. Please check your browser.');
+               // return Response::Success([], 'Download will start. Please check your browser.');
+                return Response::Success(
+                    $result['zip_path'],
+                    "File successfully checked in"
+                );
             }
 
             return Response::Success($result['files'], $result['message']);

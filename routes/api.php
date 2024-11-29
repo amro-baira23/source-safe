@@ -92,7 +92,7 @@ Route::middleware("jwt_auth:access")->controller(FilesController::class)->group(
     Route::get("/groups/{group}/files/{file}/download","download");
 });
 
-Route::middleware(['jwt_auth:access', 'SuperAdmin'])->controller(FilesController::class)->group(function () {
+Route::middleware(['jwt_auth:access'])->controller(FilesController::class)->group(function () {
     Route::get('/groups/{group}/files','getGroupFiles');
     Route::get('/files','getAllFiles');
     Route::post('/files/{file}/delete_with_locks','deleteFileWithLocks');

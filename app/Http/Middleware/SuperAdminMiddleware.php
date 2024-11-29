@@ -23,7 +23,7 @@ class SuperAdminMiddleware
        if (Auth::check() && $user->hasRole('admin')){
            return $next($request);
        }else{
-           return response()->json(['message' => 'Unauthorized'], 403);
+           return response()->json(['message' => 'Unauthorized, user must be super-admin to access this endpoint'], 403);
        }
     }
 }

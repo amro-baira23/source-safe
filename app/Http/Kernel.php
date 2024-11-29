@@ -66,5 +66,6 @@ class Kernel extends HttpKernel
 
         'member_OR_admin' => \App\Http\Middleware\MemberGroupMiddleware::class,
         'GroupAdmin' => \App\Http\Middleware\AdminGroupMiddleware::class,
+        'SuperAdmin' => \App\Http\Middleware\SuperAdminMiddleware::class,
     ];
 }

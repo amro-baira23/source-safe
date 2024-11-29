@@ -34,11 +34,19 @@ Route::controller(AuthController::class)->group(function () {
 
 });
 
+// user controller  // **********************************
 Route::middleware("auth:sanctum")->controller(UserController::class)->group(function (){
     Route::get("/users","index");
 });
 
-// groups  //
+Route::middleware(['auth:sanctum', 'SuperAdmin'])->controller(UserController::class)->group(function () {
+    Route::get('/users', 'getAllUsers'); // Get all users
+    Route::post('/users/{user}', 'deleteUser'); // Delete a user with soft delete
+    Route::get('/users/{user}/groups', 'getUserGroups'); // Get all groups for a user
+});
+
+
+// groups  // ************************************
 
 Route::middleware(['auth:sanctum', 'GroupAdmin'])->controller(GroupsController::class)->group(function () {
     Route::post("/update_group/{groupId}","update_group");
@@ -49,7 +57,7 @@ Route::middleware(['auth:sanctum', 'GroupAdmin'])->controller(GroupsController::
 });
 
 Route::middleware(['auth:sanctum', 'member_OR_admin'])->controller(GroupsController::class)->group(function () {
-    Route::get("/show_group/{id}","show_group");
+    Route::get("/show_group/{groupId}","show_group");
 });
 
 
@@ -59,7 +67,14 @@ Route::middleware('auth:sanctum')->controller(GroupsController::class)->group(fu
 
 });
 
-// files  //
+
+Route::middleware(['auth:sanctum', 'SuperAdmin'])->controller(GroupsController::class)->group(function () {
+    Route::get('/groups','getAllGroups');
+    Route::post('/groups/{group}/delete_with_files','deleteGroupWithFiles');
+    Route::post('/groups/{group}/soft_delete','softDeleteGroup');
+});
+
+// files  // *********************************
 
 Route::middleware(['auth:sanctum', 'member_OR_admin'])->controller(FilesController::class)->group(function () {
 
@@ -82,10 +97,22 @@ Route::middleware("auth:sanctum")->controller(FilesController::class)->group(fun
     Route::get("/groups/{group}/files/{file}/download","download");
 });
 
+Route::middleware(['auth:sanctum', 'SuperAdmin'])->controller(FilesController::class)->group(function () {
+    Route::get('/groups/{group}/files','getGroupFiles');
+    Route::get('/files','getAllFiles');
+    Route::post('/files/{file}/delete_with_locks','deleteFileWithLocks');
+    Route::post('/files/{file}/soft_delete','softDeleteFile');
+});
+
+
+
+// notifications  // ***********************************
+
 Route::middleware("auth:sanctum")->controller(NotificationController::class)->group(function () {
     Route::post("fcm_token","updateDeviceToken");
     Route::post("notify","sendFcmNotification");
 });
+
 
 
 

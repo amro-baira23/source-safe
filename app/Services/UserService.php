@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -100,6 +101,35 @@ class UserService
 
         return $user;
 
+    }
+
+    public function getAllUsers(): array
+    {
+        $users = User::with('roles')->get();
+
+        return [
+            'users' => UserResource::collection($users),
+            'message' => 'All users retrieved successfully',
+        ];
+    }
+
+    public function deleteUser(User $user): array
+    {
+        $user->delete();
+
+        return [
+            'user' => $user,
+            'message' => 'User deleted successfully',
+        ];
+    }
+
+    public function getUserGroups(User $user): array
+    {
+
+        return [
+            'groups' => $user->groups,
+            'message' => 'Groups retrieved successfully for the user',
+        ];
     }
 
 }

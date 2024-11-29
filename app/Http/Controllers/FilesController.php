@@ -142,4 +142,43 @@ class FilesController extends Controller
         }
     }
 
+    public function getGroupFiles(Group  $group)
+    {
+        $data =[];
+        try {
+            $data = $this->FileService->getGroupFiles($group);
+            return Response::Success(FileResource::collection($data['files']), $data['message']);
+        } catch (Throwable $th) {
+            return Response::Error($data, $th->getMessage());
+        }
+    }
+
+    public function getAllFiles()
+    {
+        $files = $this->FileService->getAllFiles();
+        return FileResource::collection($files);
+    }
+
+    public function deleteFileWithLocks(File $file): JsonResponse
+    {
+
+        try {
+            $result = $this->FileService->deleteFileWithLocks($file);
+            return Response::Success([], $result['message']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage());
+        }
+
+    }
+
+    public function softDeleteFile(File $file): JsonResponse
+    {
+        try {
+            $result = $this->FileService->softDeleteFile($file);
+            return Response::Success($result['file'], $result['message']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage());
+        }
+    }
+
 }

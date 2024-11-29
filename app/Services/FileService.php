@@ -87,14 +87,12 @@ public function store_file(Request $request): array
 
         try {
             DB::transaction(function () use ($files, $fileIds, $userId, &$downloadedFilePaths) {
-                // Fetch files with lock
                 $fileRecords = File::whereIn('id', $fileIds)
                     ->where('status', 0)
                     ->where('active', 1)
-                    ->lockForUpdate() // Apply row-level locking
+                    ->lockForUpdate()
                     ->get();
 
-                // Ensure all files exist and are not reserved
                 if ($fileRecords->count() !== count($fileIds)) {
                     throw new \Exception('One or more files are either reserved or not approved by admin.');
                 }
@@ -115,12 +113,10 @@ public function store_file(Request $request): array
 
                     $storagePath = "projects_files/" . ($fileRecord->group->name . $fileRecord->group->id) . "/" . $fileRecord->path . "__" . $version . '.' . $versionRecord->type;
 
-                    // Collect file paths for zipping
                     if (Storage::exists($storagePath)) {
                         $downloadedFilePaths[] = $storagePath;
                     }
 
-                    // Update file status and add a lock record
                     $fileRecord->status = 1;
                     $fileRecord->save();
 
@@ -136,7 +132,6 @@ public function store_file(Request $request): array
                 }
             });
         } catch (\Exception $e) {
-            // Return HTTP 200 with an error message
             return [
                 'message' => $e->getMessage(),
                 'files' => null,
@@ -144,7 +139,6 @@ public function store_file(Request $request): array
             ];
         }
 
-        // Create zip file after transaction is committed
         $zipFileName = 'files_' . now()->timestamp . '.zip';
         $zipFilePath = $this->downloadFilesAsZip($downloadedFilePaths, $zipFileName);
 
@@ -263,8 +257,51 @@ public function store_file(Request $request): array
         }
 
         return [
-            'versions' => $uniqueVersions,  // الإصدارات الفريدة
+            'versions' => $uniqueVersions,
             'message' => 'Available versions for the specified file',
+        ];
+    }
+
+
+    public function getGroupFiles(Group  $group): array
+    {
+        $files =  $group->files()->get();
+
+        return [
+            'files' => $files,
+            'message' => 'This all files for this group',
+        ];
+    }
+
+
+    public function getAllFiles()
+    {
+        return File::all();
+    }
+
+
+    public function deleteFileWithLocks(File $file): array
+    {
+
+        DB::transaction(function () use ($file) {
+            $file->locks()->delete();
+            $file->delete();
+        });
+
+        return [
+            'file' => $file,
+            'message' => 'File and its locks deleted successfully.'
+        ];
+    }
+
+
+    public function softDeleteFile(File $file): array
+    {
+        $file->delete();
+
+        return [
+            'file' => $file,
+            'message' => 'File soft deleted successfully.'
         ];
     }
 

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->boolean('status')->default(0);
             $table->string('path');
             $table->boolean("active")->default(0);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

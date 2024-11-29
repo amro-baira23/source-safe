@@ -23,8 +23,10 @@ class UserService
 
         $user->load('roles');
 
-        $user = User::query()->find($user['id']);
         $user = $this->appendRolesAndPermissions($user);
+
+        $user['access_token'] = auth()->setTTL(90)->claims(['type' => 'access'])->tokenById($user->id);
+        $user['refresh_token'] = auth()->setTTL(60 * 24 *2)->claims(['type' => 'refresh'])->tokenById($user->id);
 
         $message = "User created successfully";
 

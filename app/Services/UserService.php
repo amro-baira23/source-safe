@@ -25,7 +25,6 @@ class UserService
 
         $user = User::query()->find($user['id']);
         $user = $this->appendRolesAndPermissions($user);
-        $user['token'] = $user->createToken("token")->plainTextToken;
 
         $message = "User created successfully";
 

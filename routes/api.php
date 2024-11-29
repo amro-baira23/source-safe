@@ -5,14 +5,9 @@ use App\Http\Controllers\FilesController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
-use App\Http\Responses\Response;
-use App\Models\User;
-use Illuminate\Contracts\Cache\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
-use Okapi\Filesystem\Filesystem;
-use PHPUnit\TextUI\Configuration\GroupCollection;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,7 +34,7 @@ Route::middleware("jwt_auth:access")->controller(UserController::class)->group(f
     Route::get("/users","index");
 });
 
-Route::middleware(['auth:sanctum', 'SuperAdmin'])->controller(UserController::class)->group(function () {
+Route::middleware(['jwt_auth:access', 'SuperAdmin'])->controller(UserController::class)->group(function () {
     Route::get('/users', 'getAllUsers'); // Get all users
     Route::post('/users/{user}', 'deleteUser'); // Delete a user with soft delete
     Route::get('/users/{user}/groups', 'getUserGroups'); // Get all groups for a user
@@ -117,7 +112,5 @@ Route::middleware("jwt_auth:access")->controller(NotificationController::class)-
 
 
 Route::middleware("jwt_auth:access")->post("/test/{user}",function (Request $request){
-    $file = Storage::allFiles("projects_files");
-    dump($file);
-    return response()->download(storage_path("app/{$file[0]}"),"newfile.txt");
+    dump("hello world");
 });

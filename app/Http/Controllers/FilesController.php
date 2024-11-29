@@ -106,10 +106,7 @@ class FilesController extends Controller
 
             if (!empty($result['zip_path'])) {
                // return Response::Success([], 'Download will start. Please check your browser.');
-                return Response::Success(
-                    $result['zip_path'],
-                    "File successfully checked in"
-                );
+               return response()->download($result['zip_path']);
             }
 
             return Response::Success($result['files'], $result['message']);

@@ -46,7 +46,7 @@ class AuthRequest extends FormRequest
             "username" => ["required","alpha_dash", Rule::unique("users", "username")],
             "password" => ["required", "confirmed", Password::min(8)->numbers()],
             "password_confirmation" => ["required", Password::min(8)->numbers()],
-            "email" => ["required", "email",Rule::unique("users", "username")],
+            "email" => ["required", "email",Rule::unique("users", "email")],
         ];
     }
 }

@@ -51,7 +51,7 @@ Route::middleware(["jwt_auth:access", 'GroupAdmin'])->controller(GroupsControlle
     Route::post("/removeUserFromGroup/{groupId}/{userId}","removeUserFromGroup");
 });
 
-Route::middleware(['jwt_auth:', 'member_OR_admin'])->controller(GroupsController::class)->group(function () {
+Route::middleware(['jwt_auth:access', 'member_OR_admin'])->controller(GroupsController::class)->group(function () {
     Route::get("/show_group/{groupId}","show_group");
 });
 

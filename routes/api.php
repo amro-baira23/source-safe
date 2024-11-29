@@ -34,7 +34,7 @@ Route::middleware("jwt_auth:access")->controller(UserController::class)->group(f
     Route::get("/users","index");
 });
 
-Route::middleware(['jwt_auth:access', 'SuperAdmin'])->controller(UserController::class)->group(function () {
+Route::middleware(['jwt_auth:access'])->controller(UserController::class)->group(function () {
     Route::get('/users', 'getAllUsers'); // Get all users
     Route::post('/users/{user}', 'deleteUser'); // Delete a user with soft delete
     Route::get('/users/{user}/groups', 'getUserGroups'); // Get all groups for a user

@@ -34,13 +34,9 @@ class FileService
         ];
     }
 
-    public function store_file(Request $request): array {
-        $group = $request->group;
+    public function store_file(Request $request, Group $group): array {
 
-        $is_admin = $group->users()
-                        ->where('user_id', auth()->id())
-                        ->where('role', 'admin')
-                        ->exists();
+        $is_admin = $group->isAdmin(auth()->user());
 
         $file_storage_name  = Str::random(40);
         $file = $request->file("path");
@@ -48,25 +44,14 @@ class FileService
         $file->storeAs("projects_files/" . ($group->name . $group->id) , $file_storage_name . "__1" .".". $file->guessExtension());
 
         if (!$is_admin) {
-            $file = File::create([
-                'name'=> $file->getClientOriginalName(),
-                'path'=> $file_storage_name,
-                'group_id'=> $group->id,
-                'active' => 0,
-            ]);
-
+            $file = $this->fileRepositry->store($file->getClientOriginalName(), $file_storage_name, $group->id);
             return [
                 'file' => $file,
                 'message' => ' File created successfully by member ',
             ];
         }
 
-        $file = File::create([
-        'name'=> $file->getClientOriginalName(),
-        'path'=>$file_storage_name,
-        'group_id'=>$group->id,
-        'active' => 1,
-        ]);
+        $file = $this->fileRepositry->store($file->getClientOriginalName(), $file_storage_name, $group->id, 1);
 
         Lock::create([
             'user_id' => auth()->user()->id,
@@ -95,7 +80,7 @@ class FileService
             ->where("file_id",$file->id)
             ->orderBy("created_at","desc")->first()->type;
         }
-        $file_name = "projects_files/" . $group->name . $group->id . "/{$file->path}__{$required_version}.{$file_type}";
+        $file_name = "projects_files/$group->name$group->id/{$file->path}__{$required_version}.{$file_type}";
         if (!Storage::exists($file_name))
             throw new Exception("file doesn't exist",422);
         return storage_path("app/$file_name");
@@ -154,7 +139,7 @@ class FileService
                     ]);
                 }
             });
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [
                 'message' => $e->getMessage(),
                 'files' => null,
@@ -172,7 +157,7 @@ class FileService
     }
 
 
-    public function downloadFilesAsZip(array $filePaths, string $zipFileName): string
+    private function downloadFilesAsZip(array $filePaths, string $zipFileName): string
     {
         $zipPath = storage_path("app/Downloads/{$zipFileName}");
 
@@ -245,7 +230,7 @@ class FileService
         ];
     }
 
-    public function getAvailableFilesWithVersions( $file)
+    public function getAvailableFilesWithVersions($file)
     {
 
         $versions = $file->locks()->orderBy('Version_number', 'desc')->get();
@@ -266,9 +251,9 @@ class FileService
 
 
 
-    public function getAllFiles()
+    public function getAllFiles($request)
     {
-        return File::all();
+        return $this->fileRepositry->index($request);
     }
 
 

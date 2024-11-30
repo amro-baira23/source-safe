@@ -32,8 +32,8 @@ class FilesController extends Controller
     {
         $data =[];
         try {
-            $data = $this->FileService->indexPerGroup($request,$group);
-            return Response::Success(FileResource::collection($data['files']), $data['message']);
+            $data = $this->FileService->indexPerGroup($request,$group);     
+            return Response::Success(($data['files']), $data['message'], withPagination:true);
         } catch (Throwable $th) {
             return Response::Error($data, $th->getMessage());
         }
@@ -43,11 +43,11 @@ class FilesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store_file(FileRequest $request): JsonResponse
+    public function store_file(FileRequest $request, Group $group): JsonResponse
     {
         $data = [];
         try {
-            $data = $this->FileService->store_file($request);
+            $data = $this->FileService->store_file($request, $group);
             return Response::Success(new FileResource($data['file']), $data['message']);
 
         } catch(Throwable $th){
@@ -90,7 +90,6 @@ class FilesController extends Controller
             $result = $this->FileService->check_in($request->input('files'));
 
             if (!empty($result['zip_path'])) {
-               // return Response::Success([], 'Download will start. Please check your browser.');
                return response()->download($result['zip_path']);
             }
 
@@ -130,15 +129,14 @@ class FilesController extends Controller
 
    
 
-    public function getAllFiles()
+    public function getAllFiles(Request $request)
     {
-        $files = $this->FileService->getAllFiles();
+        $files = $this->FileService->getAllFiles($request);
         return FileResource::collection($files);
     }
 
     public function deleteFileWithLocks(File $file): JsonResponse
     {
-
         try {
             $result = $this->FileService->deleteFileWithLocks($file);
             return Response::Success([], $result['message']);

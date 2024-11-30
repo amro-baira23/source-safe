@@ -171,16 +171,9 @@ public function store_group(Request $request): array
             return ['message' => $message, 'code' => $code];
         }
 
-        public function removeUserFromGroup($groupId, $userId): array
+        public function removeUserFromGroup($group, $user): array
         {
-            $group = Group::find($groupId);
-
             $user_id = auth()->user()->id;
-
-            if (!$group) {
-                return ['message' => 'Group not found', 'code' => 404];
-            }
-
             $isAdmin = $group->users()->where('user_id', $user_id)->first()->pivot->role;
 
             if ($isAdmin != 'admin') {
@@ -188,16 +181,16 @@ public function store_group(Request $request): array
                 return ['message' => 'Unauthorized. Only the group admin can access this resource.', 'code' => 403];
             }
 
-            if (!$group->users->contains($userId)) {
+            if (!$group->users->contains($user->id)) {
                 return ['message' => 'User not found in the group', 'code' => 404];
             }
 
-            $userRole = $group->users()->where('user_id', $userId)->first()->pivot->role;
+            $userRole = $group->users()->where('user_id', $user->id)->first()->pivot->role;
             if ($userRole === 'admin') {
                 return ['message' => 'Cannot remove the admin of the group', 'code' => 403];
             }
 
-            $group->users()->detach($userId);
+            $group->users()->detach($user->id);
 
             return ['message' => 'User removed from the group successfully', 'code' => 200];
         }

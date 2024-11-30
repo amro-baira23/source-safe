@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateGroupRequest;
 use App\Http\Resources\GroupResource;
 use App\Http\Responses\Response;
 use App\Models\Group;
+use App\Models\User;
 use App\Services\GroupService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -103,10 +104,10 @@ class GroupsController extends Controller
         }
     }
 
-     public function removeUserFromGroup($groupId , $userId){
+     public function removeUserFromGroup(Request $request, Group $group ,User $user){
         $data = [];
         try{
-            $data = $this->GroupService->removeUserFromGroup($groupId , $userId);
+            $data = $this->GroupService->removeUserFromGroup($group , $user);
             return Response::Success($data['message'],$data['code']);
         }catch(Throwable $th){
             $message = $th->getMessage();

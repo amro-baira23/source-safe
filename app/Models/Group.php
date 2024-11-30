@@ -24,4 +24,11 @@ class Group extends Model
     {
         return $this->belongsToMany(User::class , 'perms')->withPivot('role', 'approved')->withTimestamps();
     }
+
+    public function isAdmin(User $user){
+        return $this->users()
+        ->where('user_id', $user->id)
+        ->where('role', 'admin')
+        ->exists();
+    }
 }

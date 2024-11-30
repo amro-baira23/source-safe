@@ -45,11 +45,11 @@ Route::middleware(['jwt_auth:access'])->controller(UserController::class)->group
 // groups  // ************************************
 
 Route::middleware(["jwt_auth:access", 'GroupAdmin'])->controller(GroupsController::class)->group(function () {
-    Route::post("/update_group/{groupId}","update_group");
+    Route::post("/update_group/{group}","update_group");
     // Route::post("/joinGroup/{id}","joinGroup");
     // Route::get("/groups/{group}/join_requests","getJoinRequests");
-    // Route::post("/approveMember/{groupId}/{userId}","approveMember");
-    Route::post("/removeUserFromGroup/{groupId}/{userId}","removeUserFromGroup");
+    // Route::post("/approveMember/{group}/{userId}","approveMember");
+    Route::post("/removeUserFromGroup/{group}/{user}","removeUserFromGroup");
 });
 
 Route::middleware(['jwt_auth:access', 'member_OR_admin'])->controller(GroupsController::class)->group(function () {

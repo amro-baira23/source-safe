@@ -26,23 +26,19 @@ class FilesController extends Controller
 
 
    /**
-     * Display a listing of the resource.
+     * Display a listing of files inside a specific group.
      */
-    public function index(Request $request, Group $group)
+    public function indexPerGroup(Request $request, Group $group)
     {
-        if(!$request->user()->isMember($group))
-            return response(["message" => "user is not member of this group"],401);
-        $files = $group->files()->paginate(10);
-        return FileResource::collection($files);
+        $data =[];
+        try {
+            $data = $this->FileService->indexPerGroup($request,$group);
+            return Response::Success(FileResource::collection($data['files']), $data['message']);
+        } catch (Throwable $th) {
+            return Response::Error($data, $th->getMessage());
+        }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -67,31 +63,20 @@ class FilesController extends Controller
     public function show(Group  $group,File $file)
     {
 
-        //return $this->returnSuccessMessage($msg = "success", $errNum = "S000");
         return new  FileResource($file);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(FileRequest $request, Group $group, File $file)
-    {
-        $file->update(
-            $request->validated()
-        );
-        return new FileResource($file);
-    }
-
+  
     public function download(Request $request,Group $group,File $file){
-
+        
         $data = [];
         try {
-            $data = $this->FileService->download($request);
+            $data = $this->FileService->download($group,$file,$request->version_number);
             return response()->download($data);
 
         } catch(Throwable $th){
             $message = $th->getMessage();
-            return Response::Error($data,$message );
+            return Response::Error($data,$message , 422);
         }
 
     }
@@ -130,11 +115,11 @@ class FilesController extends Controller
         //  return new  FileResource($file);
     }
 
-    public function getAvailableFilesWithVersions($groupId, $fileId): JsonResponse
+    public function getAvailableFilesWithVersions(Group $group,File $file): JsonResponse
     {
         $data = [];
         try {
-            $data = $this->FileService->getAvailableFilesWithVersions($groupId , $fileId);
+            $data = $this->FileService->getAvailableFilesWithVersions( $file);
             return Response::Success($data['versions'], $data['message']);
 
         } catch (Throwable $th) {
@@ -143,16 +128,7 @@ class FilesController extends Controller
         }
     }
 
-    public function getGroupFiles(Group  $group)
-    {
-        $data =[];
-        try {
-            $data = $this->FileService->getGroupFiles($group);
-            return Response::Success(FileResource::collection($data['files']), $data['message']);
-        } catch (Throwable $th) {
-            return Response::Error($data, $th->getMessage());
-        }
-    }
+   
 
     public function getAllFiles()
     {

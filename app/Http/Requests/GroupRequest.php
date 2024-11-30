@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class GroupRequest extends FormRequest
 {
@@ -27,4 +28,22 @@ class GroupRequest extends FormRequest
             'user_ids.*' => 'exists:users,id'
         ];
     }
+
+    public function after(){
+        return [
+            function (Validator $validator) {
+                if ($this->groupdNameIsntUnique()) {
+                    $validator->errors()->add(
+                        'group_name',
+                        'Group name should be unique for the user!'
+                    );
+                }
+            }
+        ];
+    }
+
+    public function groupdNameIsntUnique(){
+        return false;
+    }
+
 }

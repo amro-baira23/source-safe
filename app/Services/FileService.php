@@ -2,23 +2,39 @@
 
 namespace App\Services;
 
-use App\Http\Requests\FileRequest;
+use App\Http\Repositories\FileRepository;
+use App\Http\Resources\FileResource;
+use App\Http\Resources\LockResource;
 use App\Models\File;
 use App\Models\Lock;
 use App\Models\Group;
+use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Event\Code\Throwable;
 use ZipArchive;
 
-use Illuminate\Support\Facades\URL;
 
 class FileService
 {
-public function store_file(Request $request): array
+    private FileRepository $fileRepositry;
+
+    public function __construct()
     {
+        $this->fileRepositry = new FileRepository();    
+    }
+
+    public function indexPerGroup($request, $group){
+        $files = $this->fileRepositry->indexPerGroup($request,$group);
+        return [
+            "files" => FileResource::collection($files),
+            "message" => "group \"$group->name\" files"
+        ];
+    }
+
+    public function store_file(Request $request): array {
         $group = $request->group;
 
         $is_admin = $group->users()
@@ -70,12 +86,19 @@ public function store_file(Request $request): array
     }
 
 
-    public function download($request){
-        $file = $request->file;
-        $group = $request->group;
-        $last_version = $request->version ?? $file->locks()->orderBy("created_at")->first();
-        $file_name = "app/projects_files/" . $group->name . $group->id . "/{$file->path}__{$last_version->Version_number}.{$last_version->type}";
-        return storage_path($file_name);
+    public function download($group,$file,$required_version = null){
+        if(is_null($required_version)) {
+            $required_version = $file->locks()->orderBy("created_at","desc")->first()->Version_number;
+            $file_type = $file->locks()->orderBy("created_at","desc")->first()->type;
+        } else {
+            $file_type = $file->locks()
+            ->where("file_id",$file->id)
+            ->orderBy("created_at","desc")->first()->type;
+        }
+        $file_name = "projects_files/" . $group->name . $group->id . "/{$file->path}__{$required_version}.{$file_type}";
+        if (!Storage::exists($file_name))
+            throw new Exception("file doesn't exist",422);
+        return storage_path("app/$file_name");
     }
 
 
@@ -112,7 +135,7 @@ public function store_file(Request $request): array
                     }
 
                     $storagePath = "projects_files/" . ($fileRecord->group->name . $fileRecord->group->id) . "/" . $fileRecord->path . "__" . $version . '.' . $versionRecord->type;
-                    
+
                     if (Storage::exists($storagePath)) {
                         $downloadedFilePaths[] = $storagePath;
                     }
@@ -222,33 +245,12 @@ public function store_file(Request $request): array
         ];
     }
 
-    public function getAvailableFilesWithVersions($groupId, $fileId)
+    public function getAvailableFilesWithVersions( $file)
     {
-        $group = Group::find($groupId);
-
-        if (!$group) {
-            return [
-                'versions' => null,
-                'message' => 'Group not found.',
-            ];
-        }
-
-        $file = File::where('id', $fileId)
-                    ->where('group_id', $groupId)
-                    ->where('active', 1)
-                    ->first();
-
-        if (!$file) {
-            return [
-                'versions' => null,
-                'message' => 'File not found or not active in this group.',
-            ];
-        }
 
         $versions = $file->locks()->orderBy('Version_number', 'desc')->get();
 
         $uniqueVersions = $versions->unique('Version_number');
-
         if ($uniqueVersions->isEmpty()) {
             return [
                 'versions' => null,
@@ -257,21 +259,11 @@ public function store_file(Request $request): array
         }
 
         return [
-            'versions' => $uniqueVersions,
+            'versions' => LockResource::collection($uniqueVersions),
             'message' => 'Available versions for the specified file',
         ];
     }
 
-
-    public function getGroupFiles(Group  $group): array
-    {
-        $files =  $group->files()->get();
-
-        return [
-            'files' => $files,
-            'message' => 'This all files for this group',
-        ];
-    }
 
 
     public function getAllFiles()

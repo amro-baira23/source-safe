@@ -5,6 +5,7 @@ use App\Http\Controllers\FilesController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
+use App\Http\Repositories\FileRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -35,9 +36,9 @@ Route::middleware("jwt_auth:access")->controller(UserController::class)->group(f
 });
 
 Route::middleware(['jwt_auth:access'])->controller(UserController::class)->group(function () {
-    Route::get('/users', 'getAllUsers'); // Get all users
-    Route::post('/users/{user}', 'deleteUser'); // Delete a user with soft delete
-    Route::get('/users/{user}/groups', 'getUserGroups'); // Get all groups for a user
+    Route::get('/users', 'getAllUsers'); 
+    Route::post('/users/{user}', 'deleteUser'); 
+    Route::get('/users/{user}/groups', 'getUserGroups'); 
 });
 
 
@@ -52,7 +53,7 @@ Route::middleware(["jwt_auth:access", 'GroupAdmin'])->controller(GroupsControlle
 });
 
 Route::middleware(['jwt_auth:access', 'member_OR_admin'])->controller(GroupsController::class)->group(function () {
-    Route::get("/show_group/{groupId}","show_group");
+    Route::get("/show_group/{group}","show_group");
 });
 
 
@@ -72,33 +73,20 @@ Route::middleware(['jwt_auth:access', 'SuperAdmin'])->controller(GroupsControlle
 // files  // *********************************
 
 Route::middleware(['jwt_auth:access', 'member_OR_admin'])->controller(FilesController::class)->group(function () {
-
-    Route::post("/groups/{groupId}/files/check_in","check_in");
-
-    Route::post("/groups/{groupId}/files/check_out","check_out");
-
-    Route::get("/groups/{groupId}/files/{fileId}/versions","getAvailableFilesWithVersions");
-});
-
-Route::middleware("jwt_auth:access")->controller(FilesController::class)->group(function () {
-    //TODO: add filtering
-    Route::get("/groups/{group}/files","index");
+    Route::get("/groups/{group}/files","indexPerGroup");
     Route::get("/groups/{group}/files/{file}","show");
-    //TODO: refactor code and make it take name from file
-    Route::post("/groups/{group}/files/","store_file");
-    //TODO: done but maybe useless
-    Route::post("/groups/{group}/files/{file}","edit");
-    //TODO: take by version should be edited
+    Route::get("/groups/{group}/files/{file}/versions","getAvailableFilesWithVersions");
     Route::get("/groups/{group}/files/{file}/download","download");
+    Route::post("/groups/{group}/files/","store_file");
+    Route::post("/groups/{groupId}/files/check_in","check_in");
+    Route::post("/groups/{groupId}/files/check_out","check_out");
 });
 
-Route::middleware(['jwt_auth:access'])->controller(FilesController::class)->group(function () {
-    Route::get('/groups/{group}/files','getGroupFiles');
+Route::middleware(['jwt_auth:access', 'SuperAdmin'])->controller(FilesController::class)->group(function () {
     Route::get('/files','getAllFiles');
     Route::post('/files/{file}/delete_with_locks','deleteFileWithLocks');
     Route::post('/files/{file}/soft_delete','softDeleteFile');
 });
-
 
 
 // notifications  // ***********************************
@@ -111,6 +99,7 @@ Route::middleware("jwt_auth:access")->controller(NotificationController::class)-
 
 
 
-Route::middleware("jwt_auth:access")->post("/test/{user}",function (Request $request){
-    dump("hello world");
+Route::middleware("jwt_auth:access")->post("/test/{group}",function (Request $request) {
+    dump($request->group);
+    return collect(["amro", "khaled", "mousab"]);
 });

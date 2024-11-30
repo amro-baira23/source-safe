@@ -66,9 +66,9 @@ class FilesController extends Controller
         return new  FileResource($file);
     }
 
-  
+
     public function download(Request $request,Group $group,File $file){
-        
+
         $data = [];
         try {
             $data = $this->FileService->download($group,$file,$request->version_number);
@@ -83,11 +83,11 @@ class FilesController extends Controller
 
 
 
-    public function check_in(Check_inRequest $request)
+    public function check_in(Check_inRequest $request , Group $group)
     {
         $result = [];
         try {
-            $result = $this->FileService->check_in($request->input('files'));
+            $result = $this->FileService->check_in($request->input('files'), $group);
 
             if (!empty($result['zip_path'])) {
                return response()->download($result['zip_path']);
@@ -100,11 +100,11 @@ class FilesController extends Controller
         }
     }
 
-    public function check_out(Check_outRequest $request): JsonResponse
+    public function check_out(Check_outRequest $request ,Group $group): JsonResponse
     {
         $data = [];
         try {
-            $data = $this->FileService->check_out($request);
+            $data = $this->FileService->check_out($request,$group);
             return Response::Success($data['files'], $data['message']);
 
         } catch(Throwable $th){
@@ -127,7 +127,7 @@ class FilesController extends Controller
         }
     }
 
-   
+
 
     public function getAllFiles(Request $request)
     {

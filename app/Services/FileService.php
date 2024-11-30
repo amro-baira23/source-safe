@@ -112,7 +112,7 @@ public function store_file(Request $request): array
                     }
 
                     $storagePath = "projects_files/" . ($fileRecord->group->name . $fileRecord->group->id) . "/" . $fileRecord->path . "__" . $version . '.' . $versionRecord->type;
-                    
+
                     if (Storage::exists($storagePath)) {
                         $downloadedFilePaths[] = $storagePath;
                     }
@@ -265,7 +265,7 @@ public function store_file(Request $request): array
 
     public function getGroupFiles(Group  $group): array
     {
-        $files =  $group->files()->get();
+        $files =  $group->files()->paginate(15);
 
         return [
             'files' => $files,

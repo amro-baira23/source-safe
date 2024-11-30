@@ -32,7 +32,7 @@ class FilesController extends Controller
     {
         if(!$request->user()->isMember($group))
             return response(["message" => "user is not member of this group"],401);
-        $files = $group->files()->paginate(10);
+        $files = $group->files()->paginate(15);
         return FileResource::collection($files);
     }
 

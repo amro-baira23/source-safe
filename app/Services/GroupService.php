@@ -6,6 +6,7 @@ use App\Http\Resources\GroupResource;
 use App\Http\Resources\JoinRequestsResource;
 use App\Models\Group;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -44,31 +45,14 @@ public function store_group(Request $request): array
         $groups = Group::whereHas("users",function ($query) use ($request){
             return $query->where("user_id",$request->user()->id);
         })->get();
-
-        if (!is_null($groups) && !empty($groups)) {
-            $message = "all the groups";
-            $code = 200;
-        } else {
-            $message = "no groups";
-            $code = 404;
-        }
-
-        return ['groups' => GroupResource::collection($groups), 'message' => $message, 'code' => $code];
+        return ['groups' => GroupResource::collection($groups), 'message' => "groups retrieved successfully"];
     }
 
-    public function show_group($groupId): array
+    public function show_group($group): array
     {
-        $group = Group::find($groupId);
 
-        if (!is_null($group) && !empty($group)) {
-            $message = "successfuly";
-            $code = 200;
-        } else {
-            $message = "no group";
-            $code = 404;
-        }
 
-        return ['group' => $group, 'message' => $message, 'code' => $code];
+        return ['group' => new GroupResource($group), 'message' => "retrieved successfully", 'code' => 200];
     }
 
 
@@ -182,12 +166,12 @@ public function store_group(Request $request): array
             }
 
             if (!$group->users->contains($user->id)) {
-                return ['message' => 'User not found in the group', 'code' => 404];
+                throw new Exception("user not found in group");
             }
 
             $userRole = $group->users()->where('user_id', $user->id)->first()->pivot->role;
             if ($userRole === 'admin') {
-                return ['message' => 'Cannot remove the admin of the group', 'code' => 403];
+                throw new Exception("Cannot remove the admin of the group");
             }
 
             $group->users()->detach($user->id);

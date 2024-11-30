@@ -34,11 +34,11 @@ Route::controller(AuthController::class)->group(function () {
 Route::middleware("jwt_auth:access")->controller(UserController::class)->group(function (){
     Route::get("/users","index");
 });
-// super admin
-Route::middleware(['jwt_auth:access', 'SuperAdmin'])->controller(UserController::class)->group(function () {
-    Route::get('/users', 'getAllUsers');
-    Route::post('/users/{user}', 'deleteUser');
-    Route::get('/users/{user}/groups', 'getUserGroups');
+
+Route::middleware(['jwt_auth:access'])->controller(UserController::class)->group(function () {
+    Route::get('/users', 'getAllUsers'); 
+    Route::post('/users/{user}', 'deleteUser'); 
+    Route::get('/users/{user}/groups', 'getUserGroups'); 
 });
 
 
@@ -49,7 +49,7 @@ Route::middleware(["jwt_auth:access", 'GroupAdmin'])->controller(GroupsControlle
     // Route::post("/joinGroup/{id}","joinGroup");
     // Route::get("/groups/{group}/join_requests","getJoinRequests");
     // Route::post("/approveMember/{group}/{userId}","approveMember");
-    Route::post("/removeUserFromGroup/{group}/{user}","removeUserFromGroup");
+    Route::delete("/groups/{group}/users/{user:id}","removeUserFromGroup");
 });
 
 Route::middleware(['jwt_auth:access', 'member_OR_admin'])->controller(GroupsController::class)->group(function () {
@@ -78,8 +78,8 @@ Route::middleware(['jwt_auth:access', 'member_OR_admin'])->controller(FilesContr
     Route::get("/groups/{group}/files/{file}/versions","getAvailableFilesWithVersions");
     Route::get("/groups/{group}/files/{file}/download","download");
     Route::post("/groups/{group}/files/","store_file");
-    Route::post("/groups/{group}/files/check_in","check_in");
-    Route::post("/groups/{group}/files/check_out","check_out");
+    Route::post("/groups/{groupId}/files/check_in","check_in");
+    Route::post("/groups/{groupId}/files/check_out","check_out");
 });
 
 Route::middleware(['jwt_auth:access', 'SuperAdmin'])->controller(FilesController::class)->group(function () {

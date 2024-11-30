@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Resources\GroupResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -128,7 +129,7 @@ class UserService
     {
 
         return [
-            'groups' => $user->groups,
+            'groups' => GroupResource::collection($user->groups),
             'message' => 'Groups retrieved successfully for the user',
         ];
     }

@@ -17,23 +17,11 @@ class GroupResource extends JsonResource
         return [
             "id" => $this->id,
             "name" => $this->name,
-            "users" =>$this->getUsers()
+            "users" => $this->whenLoaded("users", function(){
+                return UserResource::collection($this->users);
+            })
         ];
     }
-    public function getUsers(){
-        $res = [];
-        if($this->users){
-            foreach($this->users  as $user){
-                $res[] = [
-                'id' => $user->id,
-                'name' => $user->username,
-                'email'=>$user->email,
-                'role'=> $user->pivot->role,
-                'approved' => $user->pivot->approved
-                ];
-            }
-        }
-        return $res;
-    }
+ 
 
 }

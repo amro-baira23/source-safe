@@ -12,7 +12,6 @@ use App\Services\FileService;
 use App\Http\Responses\Response;
 use App\Models\Group;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Storage;
 use Throwable;
 class FilesController extends Controller
 {
@@ -131,8 +130,8 @@ class FilesController extends Controller
 
     public function getAllFiles(Request $request)
     {
-        $files = $this->FileService->getAllFiles($request);
-        return FileResource::collection($files);
+        $data = $this->FileService->getAllFiles($request);
+        return Response::Success($data["data"],$data["message"],withPagination: true);
     }
 
     public function deleteFileWithLocks(File $file): JsonResponse

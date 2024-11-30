@@ -41,19 +41,19 @@ class GroupsController extends Controller
         $data = [];
         try{
             $data = $this->GroupService->index_group($request);
-            return Response::Success($data['groups'],$data['message'],$data['code']);
+            return Response::Success($data['groups'],$data['message']);
         }catch(Throwable $th){
             $message = $th->getMessage();
             return Response::Error($data,$message );
         }
      }
 
-     public function show_group($groupId): JsonResponse
+     public function show_group(Group $group): JsonResponse
      {
         $data = [];
         try{
-            $data = $this->GroupService->show_group($groupId);
-            return Response::Success(new GroupResource($data['group']),$data['message'],$data['code']);
+            $data = $this->GroupService->show_group($group);
+            return Response::Success($data['group'],$data['message'],$data['code']);
         }catch(Throwable $th){
             $message = $th->getMessage();
             return Response::Error($data,$message );
@@ -111,7 +111,7 @@ class GroupsController extends Controller
             return Response::Success($data['message'],$data['code']);
         }catch(Throwable $th){
             $message = $th->getMessage();
-            return Response::Error($data,$message );
+            return Response::Error($data,$message , 403 );
         }
     }
 

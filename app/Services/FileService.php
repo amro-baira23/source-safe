@@ -253,7 +253,11 @@ class FileService
 
     public function getAllFiles($request)
     {
-        return $this->fileRepositry->index($request);
+        $files = $this->fileRepositry->index($request);
+        return [
+            "data" => FileResource::collection($files),
+            "message" => "all files",
+        ];
     }
 
 

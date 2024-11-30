@@ -78,8 +78,8 @@ Route::middleware(['jwt_auth:access', 'member_OR_admin'])->controller(FilesContr
     Route::get("/groups/{group}/files/{file}/versions","getAvailableFilesWithVersions");
     Route::get("/groups/{group}/files/{file}/download","download");
     Route::post("/groups/{group}/files/","store_file");
-    Route::post("/groups/{groupId}/files/check_in","check_in");
-    Route::post("/groups/{groupId}/files/check_out","check_out");
+    Route::post("/groups/{group}/files/check_in","check_in");
+    Route::post("/groups/{group}/files/check_out","check_out");
 });
 
 Route::middleware(['jwt_auth:access', 'SuperAdmin'])->controller(FilesController::class)->group(function () {

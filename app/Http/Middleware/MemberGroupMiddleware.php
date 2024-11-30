@@ -16,7 +16,7 @@ class MemberGroupMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-         $group =Group::find( $request->route("groupId"));
+         $group = $request->route("group");
 
          $user_id = auth()->user()->id;
 

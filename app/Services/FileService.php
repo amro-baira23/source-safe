@@ -23,7 +23,7 @@ class FileService
 
     public function __construct()
     {
-        $this->fileRepositry = new FileRepository();    
+        $this->fileRepositry = new FileRepository();
     }
 
     public function indexPerGroup($request, $group){
@@ -102,7 +102,7 @@ class FileService
     }
 
 
-    public function check_in(array $files): array
+    public function check_in(array $files, Group $group): array
     {
         $userId = auth()->id();
         $fileIds = collect($files)->pluck('file_id');
@@ -191,7 +191,7 @@ class FileService
         return $zipPath;
     }
 
-    public function check_out(Request $request): array
+    public function check_out(Request $request , Group $group): array
     {
         $fileId = $request->input('file_id');
         $userId = auth()->id();

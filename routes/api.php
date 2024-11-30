@@ -34,11 +34,11 @@ Route::controller(AuthController::class)->group(function () {
 Route::middleware("jwt_auth:access")->controller(UserController::class)->group(function (){
     Route::get("/users","index");
 });
-
-Route::middleware(['jwt_auth:access'])->controller(UserController::class)->group(function () {
-    Route::get('/users', 'getAllUsers'); 
-    Route::post('/users/{user}', 'deleteUser'); 
-    Route::get('/users/{user}/groups', 'getUserGroups'); 
+// super admin
+Route::middleware(['jwt_auth:access', 'SuperAdmin'])->controller(UserController::class)->group(function () {
+    Route::get('/users', 'getAllUsers');
+    Route::post('/users/{user}', 'deleteUser');
+    Route::get('/users/{user}/groups', 'getUserGroups');
 });
 
 

@@ -119,7 +119,7 @@ class GroupsController extends Controller
     public function getAllGroups()
     {
         $files = $this->GroupService->getAllGroups();
-        return GroupResource::collection($files);
+        return GroupUserResource::collection($files);
     }
 
     public function deleteGroupWithFiles(Group $group): JsonResponse

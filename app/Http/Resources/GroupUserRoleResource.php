@@ -18,7 +18,8 @@ class GroupUserRoleResource extends JsonResource
                 'id' => $this->id,
                 'username' => $this->username,
                 'email' => $this->email,
-                'roles' => $this->getroles(),
+                'role'=> $this->pivot->role,
+                'approved' => $this->pivot->approved
             ];
 
     }

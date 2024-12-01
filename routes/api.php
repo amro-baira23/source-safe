@@ -36,9 +36,9 @@ Route::middleware("jwt_auth:access")->controller(UserController::class)->group(f
 });
 
 Route::middleware(['jwt_auth:access'])->controller(UserController::class)->group(function () {
-    Route::get('/users', 'getAllUsers'); 
-    Route::post('/users/{user}', 'deleteUser'); 
-    Route::get('/users/{user}/groups', 'getUserGroups'); 
+    Route::get('/users', 'getAllUsers');
+    Route::post('/users/{user}', 'deleteUser');
+    Route::get('/users/{user}/groups', 'getUserGroups');
 });
 
 
@@ -49,7 +49,7 @@ Route::middleware(["jwt_auth:access", 'GroupAdmin'])->controller(GroupsControlle
     // Route::post("/joinGroup/{id}","joinGroup");
     // Route::get("/groups/{group}/join_requests","getJoinRequests");
     // Route::post("/approveMember/{group}/{userId}","approveMember");
-    Route::delete("/groups/{group}/users/{user:id}","removeUserFromGroup");
+    Route::post("/groups/{group}/users/{user}","removeUserFromGroup");
 });
 
 Route::middleware(['jwt_auth:access', 'member_OR_admin'])->controller(GroupsController::class)->group(function () {

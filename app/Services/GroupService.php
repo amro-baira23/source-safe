@@ -44,13 +44,13 @@ public function store_group(Request $request): array
     {
         $groups = Group::whereHas("users",function ($query) use ($request){
             return $query->where("user_id",$request->user()->id);
-        })->get();
+        })->with(["users","users.roles"])->get();
         return ['groups' => GroupResource::collection($groups), 'message' => "groups retrieved successfully"];
     }
 
     public function show_group($group): array
     {
-
+        $group->load("users");
 
         return ['group' => new GroupResource($group), 'message' => "retrieved successfully", 'code' => 200];
     }
@@ -181,7 +181,8 @@ public function store_group(Request $request): array
 
     public function getAllGroups()
     {
-        return Group::all();
+
+        return Group::with(["users","users.roles"])->get();
     }
 
 

@@ -18,7 +18,6 @@ class FileResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'group_id' => $this->group_id,
-            'active' => (bool) $this->active,
             'is_locked' => (bool) $this->status,
             "created_at" =>$this->created_at->format("Y-m-d h:m"),
             "updated_at" =>$this->updated_at->format("Y-m-d h:m"),

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Http\Resources\GroupResource;
+use App\Http\Resources\GroupUserResource;
 use App\Http\Resources\JoinRequestsResource;
 use App\Models\Group;
 use App\Models\User;
@@ -45,14 +46,14 @@ public function store_group(Request $request): array
         $groups = Group::whereHas("users",function ($query) use ($request){
             return $query->where("user_id",$request->user()->id);
         })->with(["users","users.roles"])->get();
-        return ['groups' => GroupResource::collection($groups), 'message' => "groups retrieved successfully"];
+        return ['groups' => GroupUserResource::collection($groups), 'message' => "groups retrieved successfully"];
     }
 
     public function show_group($group): array
     {
         $group->load("users");
 
-        return ['group' => new GroupResource($group), 'message' => "retrieved successfully", 'code' => 200];
+        return ['group' => new GroupUserResource($group), 'message' => "retrieved successfully", 'code' => 200];
     }
 
 

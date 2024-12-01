@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\GroupRequest;
 use App\Http\Requests\UpdateGroupRequest;
 use App\Http\Resources\GroupResource;
+use App\Http\Resources\GroupUserResource;
 use App\Http\Responses\Response;
 use App\Models\Group;
 use App\Models\User;
@@ -27,7 +28,7 @@ class GroupsController extends Controller
         $data = [];
         try{
             $data = $this->GroupService->store_group($request);
-            return Response::Success( new GroupResource($data['group']) , $data['message'] );
+            return Response::Success( new GroupUserResource($data['group']) , $data['message'] );
 
         }catch(Throwable $th){
             $message = $th->getMessage();
@@ -64,7 +65,7 @@ class GroupsController extends Controller
         $data = [];
         try{
             $data = $this->GroupService->update_group($request,$id);
-            return Response::Success( new GroupResource($data['group']) , $data['message'],$data['code']);
+            return Response::Success( new GroupUserResource($data['group']) , $data['message'],$data['code']);
         }catch(Throwable $th){
             $message = $th->getMessage();
             return Response::Error($data,$message );

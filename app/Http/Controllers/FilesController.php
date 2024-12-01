@@ -31,7 +31,7 @@ class FilesController extends Controller
     {
         $data =[];
         try {
-            $data = $this->FileService->indexPerGroup($request,$group);     
+            $data = $this->FileService->indexPerGroup($request,$group);
             return Response::Success(($data['files']), $data['message'], withPagination:true);
         } catch (Throwable $th) {
             return Response::Error($data, $th->getMessage());
@@ -104,7 +104,7 @@ class FilesController extends Controller
         $data = [];
         try {
             $data = $this->FileService->check_out($request,$group);
-            return Response::Success($data['files'], $data['message']);
+            return Response::Success(new FileResource($data['files']), $data['message']);
 
         } catch(Throwable $th){
             $message = $th->getMessage();

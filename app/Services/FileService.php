@@ -225,7 +225,7 @@ class FileService
         $uploadedFile->storeAs($storagePath, $file->path . '__'. ($lastLock->Version_number + 1) . '.' . $uploadedFile->extension());
 
         return [
-            'files' => [$file->name],
+            'files' => $file,
             'message' => 'File successfully checked out',
         ];
     }

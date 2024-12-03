@@ -60,11 +60,11 @@ class GroupsController extends Controller
             return Response::Error($data,$message );
         }
      }
-     public function update_group(UpdateGroupRequest $request,$id): JsonResponse
+     public function update_group(UpdateGroupRequest $request, Group $group): JsonResponse
      {
         $data = [];
         try{
-            $data = $this->GroupService->update_group($request,$id);
+            $data = $this->GroupService->update_group($request,$group);
             return Response::Success( new GroupUserResource($data['group']) , $data['message'],$data['code']);
         }catch(Throwable $th){
             $message = $th->getMessage();

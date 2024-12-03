@@ -100,6 +100,7 @@ Route::middleware("jwt_auth:access")->controller(NotificationController::class)-
 
 
 Route::middleware("jwt_auth:access")->post("/test/{group}",function (Request $request) {
-    dump($request->group);
-    return collect(["amro", "khaled", "mousab"]);
+    $group = $request->route('group');
+     $aa =$group->users;
+    return  $aa;
 });

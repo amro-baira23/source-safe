@@ -16,9 +16,11 @@ class Response{
                 'message' => $message,
                 'current_page' => $data->resource?->currentPage() ,
                 'last_page' => $data->resource?->lastPage(),
+                'per_page' => $data->resource?->perPage(),
+                'total' => $data->resource?->total()
             ],$code);
         }
-            
+
         return response()->json([
             'status' => 1,
             'data' => $data,

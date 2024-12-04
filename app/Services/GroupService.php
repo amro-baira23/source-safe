@@ -57,9 +57,9 @@ public function store_group(Request $request): array
     }
 
 
-    public function update_group(Request $request ,$groupId): array
+    public function update_group(Request $request ,Group $group): array
     {
-        $group = Group::find($groupId);
+        //$group = $request->route('group');
 
         $user_id = auth()->user()->id;
 
@@ -72,16 +72,13 @@ public function store_group(Request $request): array
 
 
         if (!is_null($group) && !empty($group)) {
-
             $group->update([
                 'name'=>$request['name'],
             ]);
-
             if ($request->has('remove_user_ids')) {
                     foreach ($request->remove_user_ids as $userId) {
-                        $userToRemove = $group->users()->where('user_id', $userId)->first();
+                        $userToRemove = $group->users->where('id', $userId)->first;
                         if ($userToRemove && $userToRemove->pivot->role !== 'admin') {
-
                             $group->users()->detach($userId);
                         }else{
                             $message = " Cannot remove the admin of the group , or the user not found in group ";
@@ -98,6 +95,8 @@ public function store_group(Request $request): array
                     }
                 }
             }
+            $group->refresh();
+
             $message = "success update";
             $code = 200;
         } else {

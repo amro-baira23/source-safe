@@ -6,6 +6,7 @@ use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
 use App\Http\Repositories\FileRepository;
+use App\Models\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -99,7 +100,8 @@ Route::middleware("jwt_auth:access")->controller(NotificationController::class)-
 
 
 
-Route::middleware("jwt_auth:access")->post("/test/{group}",function (Request $request) {
-    dump($request->group);
+Route::middleware("jwt_auth:access")->post("/test/{user}",function (Request $request) {
+    fopen(storage_path("app/fake.txt"),"w");
+    File::withTrashed()->where("name","like","file%")->forceDelete();
     return collect(["amro", "khaled", "mousab"]);
 });

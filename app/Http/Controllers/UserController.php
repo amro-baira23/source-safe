@@ -9,6 +9,7 @@ use App\Services\UserService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Responses\Response;
+use App\Models\Group;
 use Illuminate\Http\JsonResponse;
 use Throwable;
 
@@ -23,11 +24,15 @@ class UserController extends Controller
     }
 
 
-    function index(Request $request){
-        $users = User::where("username","LIKE","%$request->username%")
-            ->select(["id","username","email"])
-            ->paginate(20);
-        return UserResource::collection($users);
+    function indexPerGroup(Request $request,Group $group){
+        $data = [];
+        try {
+            $data = $this->userService->indexPerGroup($request,$group);
+            return Response::Success($data['users'], $data['message']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
     }
 
     public function getAllUsers(): JsonResponse

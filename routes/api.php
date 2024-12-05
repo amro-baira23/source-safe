@@ -40,6 +40,7 @@ Route::middleware(['jwt_auth:access'])->controller(UserController::class)->group
     Route::get('/users', 'getAllUsers');
     Route::post('/users/{user}', 'deleteUser');
     Route::get('/users/{user}/groups', 'getUserGroups');
+    Route::get("/groups/{group}/users","indexPerGroup"); 
 });
 
 

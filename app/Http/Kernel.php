@@ -68,5 +68,7 @@ class Kernel extends HttpKernel
         'GroupAdmin' => \App\Http\Middleware\AdminGroupMiddleware::class,
         "jwt_auth" => \App\Http\Middleware\JWtAuthenticate::class,
         'SuperAdmin' => \App\Http\Middleware\SuperAdminMiddleware::class,
+
+        'AuthAspect' => \App\Aspects\AuthRoleAspect::class,
     ];
 }

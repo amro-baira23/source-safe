@@ -41,7 +41,7 @@ class UserService
     {
         if(!Auth::attempt($credentials = $request->only(['username', 'password']))) {
             return [ 'message' => 'incorrect password', 'code' => 401];
-        }   
+        }
         $user = $this->appendRolesAndPermissions($request->user());
         $user['access_token'] = auth()->setTTL(90)->claims(['type' => 'access'])->attempt($credentials);
         $user['refresh_token'] = auth()->setTTL(60 * 24 *2)->claims(['type' => 'refresh'])->attempt($credentials);
@@ -107,8 +107,7 @@ class UserService
 
     public function getAllUsers(): array
     {
-        $users = User::with('roles')->get();
-
+        $users = User::with('roles')->paginate(20);
         return [
             'users' => UserResource::collection($users),
             'message' => 'All users retrieved successfully',

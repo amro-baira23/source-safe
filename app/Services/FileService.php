@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Http\Repositories\FileRepository;
 use App\Http\Resources\FileResource;
 use App\Http\Resources\LockResource;
+use App\Jobs\TrackFileChanges;
 use App\Models\File;
 use App\Models\Lock;
 use App\Models\Group;
@@ -71,7 +72,7 @@ class FileService
     }
 
 
-    public function download($group,$file,$required_version = null){
+    public function download($group, $file, $required_version = null){
         if(is_null($required_version)) {
             $required_version = $file->locks()->orderBy("created_at","desc")->first()->Version_number;
             $file_type = $file->locks()->orderBy("created_at","desc")->first()->type;
@@ -211,7 +212,7 @@ class FileService
         $file->status = 0;
         $file->save();
 
-        Lock::create([
+        $lock = Lock::create([
             'user_id' => $userId,
             'file_id' => $file->id,
             'status' => 0, // check-out status
@@ -223,9 +224,9 @@ class FileService
 
         $storagePath = "projects_files/" . ($file->group->name . $file->group->id);
         $uploadedFile->storeAs($storagePath, $file->path . '__'. ($lastLock->Version_number + 1) . '.' . $uploadedFile->extension());
-
+        TrackFileChanges::dispatchSync($lock);
         return [
-            'files' => $file,
+            'files' => new FileResource($file),
             'message' => 'File successfully checked out',
         ];
     }

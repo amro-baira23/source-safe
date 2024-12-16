@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Repositories\UserRepository;
 use App\Http\Resources\GroupResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
@@ -11,6 +12,13 @@ use Spatie\Permission\Models\Role;
 
 class UserService
 {
+
+    private UserRepository $userReporsitory;
+
+    public function __construct()
+    {
+        $this->userReporsitory = new UserRepository(); 
+    }
     public function register ($request) : array
     {
         $user = User::create([
@@ -114,6 +122,13 @@ class UserService
         ];
     }
 
+    public function indexPerGroup($request,$group) {
+        $users = $this->userReporsitory->indexPerGroup($request,$group);
+        return [
+            'users' => UserResource::collection($users),
+            'message' => "'$group->name' group's users successfully",
+        ];
+    }
     public function deleteUser(User $user): array
     {
         $user->delete();

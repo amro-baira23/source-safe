@@ -104,13 +104,12 @@ class FilesController extends Controller
         $data = [];
         try {
             $data = $this->FileService->check_out($request,$group);
-            return Response::Success(new FileResource($data['files']), $data['message']);
+            return Response::Success($data['files'], $data['message']);
 
         } catch(Throwable $th){
             $message = $th->getMessage();
-            return Response::Error($data,$message );
+            return Response::Error($data,$message);
         }
-        //  return new  FileResource($file);
     }
 
     public function getAvailableFilesWithVersions(Group $group,File $file): JsonResponse

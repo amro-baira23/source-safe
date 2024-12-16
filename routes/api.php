@@ -5,11 +5,14 @@ use App\Http\Controllers\FilesController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
-use App\Http\Repositories\FileRepository;
+use App\Jobs\TrackFileChanges;
 use App\Models\File;
+use Dotenv\Dotenv;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use SebastianBergmann\Diff\Differ;
+use SebastianBergmann\Diff\Output\UnifiedDiffOutputBuilder;
 
 /*
 |--------------------------------------------------------------------------
@@ -102,7 +105,7 @@ Route::middleware("jwt_auth:access")->controller(NotificationController::class)-
 
 
 Route::middleware("jwt_auth:access")->post("/test/{user}",function (Request $request) {
-    fopen(storage_path("app/fake.txt"),"w");
-    File::withTrashed()->where("name","like","file%")->forceDelete();
+    abort(403,"hi there");
+    
     return collect(["amro", "khaled", "mousab"]);
 });

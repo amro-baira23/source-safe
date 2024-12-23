@@ -70,5 +70,6 @@ class Kernel extends HttpKernel
         'SuperAdmin' => \App\Http\Middleware\SuperAdminMiddleware::class,
 
         'AuthAspect' => \App\Aspects\AuthRoleAspect::class,
+        'LoggingAspect' => \App\Aspects\LoggingAspect::class,
     ];
 }

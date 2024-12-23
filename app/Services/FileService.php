@@ -27,7 +27,7 @@ class FileService
         $this->fileRepositry = new FileRepository();
     }
 
-    public function indexPerGroup($request, $group){
+    public function indexPerGroup($request,  Group $group){
         $files = $this->fileRepositry->indexPerGroup($request,$group);
         return [
             "files" => FileResource::collection($files),
@@ -192,7 +192,10 @@ class FileService
         }
 
 
-        $lastLock = Lock::where('file_id', $file->id)->latest()->first(); //  the same user check_in
+        $lastLock = Lock::where('file_id', $file->id)->latest()->first();
+
+        $lastLockVersoin = Lock::where('file_id', $file->id)->where('status', 0)->latest()->first();
+        //  the same user check_in
         if (!$lastLock || $lastLock->user_id !== $userId || $lastLock->status !== 1) {
             return [
                 'files' => null,
@@ -218,12 +221,12 @@ class FileService
             'status' => 0, // check-out status
             'type' => $uploadedFile->extension(),
             'size' => $uploadedFile->getSize(),
-            'Version_number' => $lastLock->Version_number + 1,
+            'Version_number' => $lastLockVersoin->Version_number + 1,
             'date' => now(),
         ]);
 
         $storagePath = "projects_files/" . ($file->group->name . $file->group->id);
-        $uploadedFile->storeAs($storagePath, $file->path . '__'. ($lastLock->Version_number + 1) . '.' . $uploadedFile->extension());
+        $uploadedFile->storeAs($storagePath, $file->path . '__'. ($lastLockVersoin->Version_number + 1) . '.' . $uploadedFile->extension());
         TrackFileChanges::dispatchSync($lock);
         return [
             'files' => new FileResource($file),

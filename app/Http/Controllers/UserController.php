@@ -40,7 +40,7 @@ class UserController extends Controller
         $data = [];
         try {
             $data = $this->userService->getAllUsers();
-            return Response::Success($data['users'], $data['message']);
+            return Response::Success($data['users'], $data['message'], withPagination:true);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error($data, $message);

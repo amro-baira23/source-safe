@@ -30,9 +30,27 @@ class User extends Authenticatable implements JWTSubject
 
     public function getJWTIdentifier()
     {
-        return $this->getKey();   
+        return $this->getKey();
     }
-    
+
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin');
+    }
+
+    public function isMember(  $group) : bool{
+        return $this->groups()->where("group_id",$group->id)->exists();
+    }
+
+    public function isAdminGroup( $group): bool
+    {
+        return $this->perms()
+            ->where('group_id', $group->id)
+            ->where('role', 'admin')
+            ->where('approved', true)
+            ->exists();
+    }
 
     public function groups()
     {
@@ -61,9 +79,6 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Perm::class, 'user_id');
     }
 
-    public function isMember($group) : bool{
-        return $this->groups()->where("group_id",$group->id)->exists();
-    }
 
     /**
      * The attributes that should be hidden for serialization.

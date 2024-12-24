@@ -11,6 +11,7 @@ use App\Models\File;
 use App\Services\FileService;
 use App\Http\Responses\Response;
 use App\Models\Group;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Throwable;
 class FilesController extends Controller
@@ -149,6 +150,26 @@ class FilesController extends Controller
         try {
             $result = $this->FileService->softDeleteFile($file);
             return Response::Success($result['file'], $result['message']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage());
+        }
+    }
+
+    public function getFileOperations(Group $group, File $file): JsonResponse
+    {
+        try {
+            $result = $this->FileService->getFileOperations($file);
+            return Response::Success($result['operations'], $result['message'], withPagination: true);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage());
+        }
+    }
+
+    public function getUserOperations(Group $group, User $user): JsonResponse
+    {
+        try {
+            $result = $this->FileService->getUserOperations($user);
+            return Response::Success($result['operations'], $result['message'], withPagination: true);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage());
         }

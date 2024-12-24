@@ -5,10 +5,12 @@ namespace App\Services;
 use App\Http\Repositories\FileRepository;
 use App\Http\Resources\FileResource;
 use App\Http\Resources\LockResource;
+use App\Http\Resources\operationsResource;
 use App\Jobs\TrackFileChanges;
 use App\Models\File;
 use App\Models\Lock;
 use App\Models\Group;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -290,7 +292,23 @@ class FileService
         ];
     }
 
+    public function getFileOperations(File $file): array
+    {
+        $operations = $file->locks()->paginate(20);
+        return [
+            'operations' => operationsResource::collection($operations),
+            'message' => 'All operations on this file.'
+        ];
+    }
 
+    public function getUserOperations(User $user): array
+    {
+        $operations = $user->locks()->paginate(20);
+        return [
+            'operations' => operationsResource::collection($operations),
+            'message' => 'All operations by this user.'
+        ];
+    }
 
 
 }

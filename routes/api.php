@@ -55,6 +55,7 @@ Route::middleware(["jwt_auth:access", 'AuthAspect:[adminGroup,{group}]',"Logging
     // Route::get("/groups/{group}/join_requests","getJoinRequests");
     // Route::post("/approveMember/{group}/{userId}","approveMember");
     Route::post("/groups/{group}/users/{user}","removeUserFromGroup");
+    Route::get("/groups/{group}/users/{user}/operations","getUserOperations");
 });
 
 Route::middleware(['jwt_auth:access', 'AuthAspect:[member,{group}]','LoggingAspect'])->controller(GroupsController::class)->group(function () {
@@ -85,12 +86,16 @@ Route::middleware(['jwt_auth:access', 'AuthAspect:[member,{group}]',"LoggingAspe
     Route::post("/groups/{group}/files/","store_file");
     Route::post("/groups/{group}/files/check_in","check_in");
     Route::post("/groups/{group}/files/check_out","check_out");
+    Route::get("/groups/{group}/files/{file}/operations","getFileOperations");
 });
 
 Route::middleware(['jwt_auth:access', 'AuthAspect:admin',"LoggingAspect"])->controller(FilesController::class)->group(function () {
     Route::get('/files','getAllFiles');
     Route::post('/files/{file}/delete_with_locks','deleteFileWithLocks');
     Route::post('/files/{file}/soft_delete','softDeleteFile');
+});
+Route::middleware(["jwt_auth:access", 'AuthAspect:[adminGroup,{group}]',"LoggingAspect"])->controller(FilesController::class)->group(function () {
+    Route::get("/groups/{group}/users/{user}/operations","getUserOperations");
 });
 
 

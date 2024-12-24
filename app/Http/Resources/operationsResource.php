@@ -23,6 +23,7 @@ class operationsResource extends JsonResource
             "type" => $this->type,
             "size"=> $this->size,
             "Version_number"=> $this->Version_number ,
+            "change"=> $this->change,
             "created_at" =>$this->created_at->format("Y-m-d h:m"),
             "updated_at" =>$this->updated_at->format("Y-m-d h:m"),
         ];

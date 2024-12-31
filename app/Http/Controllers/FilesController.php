@@ -155,7 +155,7 @@ class FilesController extends Controller
         }
     }
 
-    public function getFileOperations(Group $group, File $file): JsonResponse
+    public function getOperations(Group $group, File $file): JsonResponse
     {
         try {
             $result = $this->FileService->getFileOperations($file);
@@ -165,14 +165,13 @@ class FilesController extends Controller
         }
     }
 
-    public function getUserOperations(Group $group, User $user): JsonResponse
-    {
-        try {
-            $result = $this->FileService->getUserOperations($user);
-            return Response::Success($result['operations'], $result['message'], withPagination: true);
-        } catch (Throwable $th) {
-            return Response::Error([], $th->getMessage());
-        }
+    public function getOperationsAsCSV(){
+
     }
 
+    public function getOperationsAsPDF(){
+        
+    }
+
+    
 }

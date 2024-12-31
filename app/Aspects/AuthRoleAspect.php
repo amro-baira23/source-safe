@@ -15,7 +15,7 @@ class AuthRoleAspect extends Aspect
     {
 
         $role = $parameters[0] ?? null;
-        $group = $parameters['group'] ?? null;
+        $group = $request->route("group");
         if (!$role) {
             return response()->json([
                 'message' => 'Access Denied: Role is required',

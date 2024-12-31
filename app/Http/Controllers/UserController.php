@@ -35,11 +35,11 @@ class UserController extends Controller
         }
     }
 
-    public function getAllUsers(): JsonResponse
+    public function index(): JsonResponse
     {
         $data = [];
         try {
-            $data = $this->userService->getAllUsers();
+            $data = $this->userService->index();
             return Response::Success($data['users'], $data['message'], withPagination:true);
         } catch (Throwable $th) {
             $message = $th->getMessage();
@@ -47,10 +47,23 @@ class UserController extends Controller
         }
     }
 
-    public function deleteUser(User $user): JsonResponse
+
+    public function getGroups(User $user): JsonResponse
+    {
+        $data = [];
+        try {
+            $data = $this->userService->getGroups($user);
+            return Response::Success($data['groups'], $data['message']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+
+    public function remove(User $user): JsonResponse
     {
         try {
-            $data = $this->userService->deleteUser($user);
+            $data = $this->userService->remove($user);
             return Response::Success($data['user'], $data['message']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
@@ -58,15 +71,34 @@ class UserController extends Controller
         }
     }
 
-    public function getUserGroups(User $user): JsonResponse
-    {
+    public function removeFromGroup(Request $request, Group $group ,User $user){
         $data = [];
-        try {
-            $data = $this->userService->getUserGroups($user);
-            return Response::Success($data['groups'], $data['message']);
-        } catch (Throwable $th) {
+        try{
+            $data = $this->userService->removeFromGroup($group , $user);
+            return Response::Success($data['message'],$data['code']);
+        }catch(Throwable $th){
             $message = $th->getMessage();
-            return Response::Error($data, $message);
+            return Response::Error($data,$message , 403 );
         }
     }
+    
+    public function getOperations(Group $group, User $user): JsonResponse
+    {
+        try {
+            $result = $this->userService->getOperations($user);
+            return Response::Success($result['operations'], $result['message'], withPagination: true);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage());
+        }
+    }
+
+    
+    public function getOperationsAsCSV(){
+
+    }
+
+    public function getOperationsAsPDF(){
+        
+    }
+
 }

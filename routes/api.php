@@ -19,40 +19,50 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+
+Route::middleware("LoggingAspect")
+    ->controller(AuthController::class)->group(function () {
+        Route::post("/login","login");
+        Route::post("/register","register");
+
+        Route::middleware("jwt_auth:refresh")
+            ->post("/refresh","refresh");
 });
 
-Route::middleware("LoggingAspect")->controller(AuthController::class)->group(function () {
-    Route::post("/login","login");
-    Route::post("/register","register");
-    Route::post("/refresh","refresh")->middleware("jwt_auth:refresh");
+Route::middleware(['jwt_auth:access','LoggingAspect'])
+    ->controller(UserController::class)->group(function () {
+        Route::get('/users', 'index');
 });
 
-Route::middleware(["jwt_auth:access","LoggingAspect"])->controller(UserController::class)->group(function (){
-    Route::get("/users","index");
+Route::middleware(['jwt_auth:access','AuthAspect:admin','LoggingAspect'])
+    ->controller(UserController::class)->group(function () {
+        Route::get('/users/{user}/groups', 'getGroups');
+        Route::post('/users/{user}', 'remove');
 });
 
-Route::middleware(['jwt_auth:access','AuthAspect:[admin,{group}]','LoggingAspect'])->controller(UserController::class)->group(function () {
-    Route::get('/users', 'getAllUsers');
-    Route::post('/users/{user}', 'deleteUser');
-    Route::get('/users/{user}/groups', 'getUserGroups');
-    Route::get("/groups/{group}/users","indexPerGroup");
+Route::middleware(["jwt_auth:access", 'AuthAspect:member',"LoggingAspect"])
+    ->controller(UserController::class)->group(function () {
+        Route::get("/groups/{group}/users","indexPerGroup");
+});
+
+Route::middleware(["jwt_auth:access", 'AuthAspect:adminGroup',"LoggingAspect"])
+    ->controller(UserController::class)->group(function () {
+        Route::post("/groups/{group}/users/{user}","removeFromGroup");
+        Route::get("/groups/{group}/users/{user}/operations","getOperations");
+        Route::get("/groups/{group}/users/{user}/operations/csv","getOperationsAsCSV");
+        Route::get("/groups/{group}/users/{user}/operations/pdf","getOperationsAsCSV");
 });
 
 
 // groups  // ************************************
 
-Route::middleware(["jwt_auth:access", 'AuthAspect:[adminGroup,{group}]',"LoggingAspect"])->controller(GroupsController::class)->group(function () {
-    Route::post("/update_group/{group}","update_group");
-    // Route::post("/joinGroup/{id}","joinGroup");
-    // Route::get("/groups/{group}/join_requests","getJoinRequests");
-    // Route::post("/approveMember/{group}/{userId}","approveMember");
-    Route::post("/groups/{group}/users/{user}","removeUserFromGroup");
-    Route::get("/groups/{group}/users/{user}/operations","getUserOperations");
+Route::middleware(["jwt_auth:access", 'AuthAspect:adminGroup',"LoggingAspect"])
+    ->controller(GroupsController::class)->group(function () {
+        Route::post("/update_group/{group}","update_group");
+
 });
 
-Route::middleware(['jwt_auth:access', 'AuthAspect:[member,{group}]','LoggingAspect'])->controller(GroupsController::class)->group(function () {
+Route::middleware(['jwt_auth:access', 'AuthAspect:member','LoggingAspect'])->controller(GroupsController::class)->group(function () {
     Route::get("/show_group/{group}","show_group");
 });
 
@@ -64,7 +74,7 @@ Route::middleware(['jwt_auth:access',"LoggingAspect"])->controller(GroupsControl
 });
 
 
-Route::middleware(['jwt_auth:access','AuthAspect:[admin,{group}]',"LoggingAspect"])->controller(GroupsController::class)->group(function () {
+Route::middleware(['jwt_auth:access','AuthAspect:admin',"LoggingAspect"])->controller(GroupsController::class)->group(function () {
     Route::get('/groups','getAllGroups');
     Route::post('/groups/{group}/delete_with_files','deleteGroupWithFiles');
     Route::post('/groups/{group}/soft_delete','softDeleteGroup');
@@ -72,32 +82,34 @@ Route::middleware(['jwt_auth:access','AuthAspect:[admin,{group}]',"LoggingAspect
 
 // files  // *********************************
 
-Route::middleware(['jwt_auth:access', 'AuthAspect:[member,{group}]',"LoggingAspect"])->controller(FilesController::class)->group(function () {
-    Route::get("/groups/{group}/files","indexPerGroup");
-    Route::get("/groups/{group}/files/{file}","show");
-    Route::get("/groups/{group}/files/{file}/versions","getAvailableFilesWithVersions");
-    Route::get("/groups/{group}/files/{file}/download","download");
-    Route::post("/groups/{group}/files/","store_file");
-    Route::post("/groups/{group}/files/check_in","check_in");
-    Route::post("/groups/{group}/files/check_out","check_out");
-    Route::get("/groups/{group}/files/{file}/operations","getFileOperations");
+Route::middleware(['jwt_auth:access', 'AuthAspect:member',"LoggingAspect"])
+    ->controller(FilesController::class)->group(function () {
+        Route::get("/groups/{group}/files","indexPerGroup");
+        Route::get("/groups/{group}/files/{file}","show");
+        Route::get("/groups/{group}/files/{file}/versions","getAvailableFilesWithVersions");
+        Route::get("/groups/{group}/files/{file}/download","download");
+        Route::post("/groups/{group}/files/","store_file");
+        Route::post("/groups/{group}/files/check_in","check_in");
+        Route::post("/groups/{group}/files/check_out","check_out");
+        Route::get("/groups/{group}/files/{file}/operations","getOperations");
+        Route::get("/groups/{group}/files/{file}/operations/csv","getOperationsAsCSV");
+        Route::get("/groups/{group}/files/{file}/operations/pdf","getOperationsAsCSV");
 });
 
-Route::middleware(['jwt_auth:access', 'AuthAspect:admin',"LoggingAspect"])->controller(FilesController::class)->group(function () {
-    Route::get('/files','getAllFiles');
-    Route::post('/files/{file}/delete_with_locks','deleteFileWithLocks');
-    Route::post('/files/{file}/soft_delete','softDeleteFile');
-});
-Route::middleware(["jwt_auth:access", 'AuthAspect:[adminGroup,{group}]',"LoggingAspect"])->controller(FilesController::class)->group(function () {
-    Route::get("/groups/{group}/users/{user}/operations","getUserOperations");
+Route::middleware(['jwt_auth:access', 'AuthAspect:admin',"LoggingAspect"])
+    ->controller(FilesController::class)->group(function () {
+        Route::get('/files','getAllFiles');
+        Route::post('/files/{file}/delete_with_locks','deleteFileWithLocks');
+        Route::post('/files/{file}/soft_delete','softDeleteFile');
 });
 
 
 // notifications  // ***********************************
 
-Route::middleware("jwt_auth:access")->controller(NotificationController::class)->group(function () {
-    Route::post("fcm_token","updateDeviceToken");
-    Route::post("notify","sendFcmNotification");
+Route::middleware("jwt_auth:access")
+    ->controller(NotificationController::class)->group(function () {
+        Route::post("fcm_token","updateDeviceToken");
+        Route::post("notify","sendFcmNotification");
 });
 
 

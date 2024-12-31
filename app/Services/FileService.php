@@ -301,15 +301,6 @@ class FileService
         ];
     }
 
-    public function getUserOperations(User $user): array
-    {
-        $operations = $user->locks()->paginate(20);
-        return [
-            'operations' => operationsResource::collection($operations),
-            'message' => 'All operations by this user.'
-        ];
-    }
-
 
 }
 

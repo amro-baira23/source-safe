@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Http\Resources\GroupResource;
 use App\Http\Resources\GroupUserResource;
 use App\Http\Resources\JoinRequestsResource;
+use App\Http\Resources\operationsResource;
 use App\Models\Group;
 use App\Models\User;
 use Exception;
@@ -155,29 +156,6 @@ public function store_group(Request $request): array
             return ['message' => $message, 'code' => $code];
         }
 
-        public function removeUserFromGroup($group, $user): array
-        {
-            $user_id = auth()->user()->id;
-            $isAdmin = $group->users()->where('user_id', $user_id)->first()->pivot->role;
-
-            if ($isAdmin != 'admin') {
-
-                return ['message' => 'Unauthorized. Only the group admin can access this resource.', 'code' => 403];
-            }
-
-            if (!$group->users->contains($user->id)) {
-                throw new Exception("user not found in group");
-            }
-
-            $userRole = $group->users()->where('user_id', $user->id)->first()->pivot->role;
-            if ($userRole === 'admin') {
-                throw new Exception("Cannot remove the admin of the group");
-            }
-
-            $group->users()->detach($user->id);
-
-            return ['message' => 'User removed from the group successfully', 'code' => 200];
-        }
 
     public function getAllGroups()
     {
@@ -209,6 +187,7 @@ public function store_group(Request $request): array
             'message' => 'Group soft deleted successfully.'
         ];
     }
+
 
 }
 

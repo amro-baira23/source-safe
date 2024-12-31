@@ -105,16 +105,6 @@ class GroupsController extends Controller
         }
     }
 
-     public function removeUserFromGroup(Request $request, Group $group ,User $user){
-        $data = [];
-        try{
-            $data = $this->GroupService->removeUserFromGroup($group , $user);
-            return Response::Success($data['message'],$data['code']);
-        }catch(Throwable $th){
-            $message = $th->getMessage();
-            return Response::Error($data,$message , 403 );
-        }
-    }
 
     public function getAllGroups()
     {

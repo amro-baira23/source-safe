@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Http\Repositories\UserRepository;
 use App\Http\Resources\GroupResource;
+use App\Http\Resources\operationsResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -113,7 +115,7 @@ class UserService
 
     }
 
-    public function getAllUsers(): array
+    public function index(): array
     {
         $users = User::with('roles')->paginate(20);
         return [
@@ -129,7 +131,7 @@ class UserService
             'message' => "'$group->name' group's users successfully",
         ];
     }
-    public function deleteUser(User $user): array
+    public function remove(User $user): array
     {
         $user->delete();
 
@@ -138,8 +140,30 @@ class UserService
             'message' => 'User deleted successfully',
         ];
     }
+    public function removeFromGroup($group, $user): array
+    {
+        $user_id = auth()->user()->id;
+        $isAdmin = $group->users()->where('user_id', $user_id)->first()->pivot->role;
 
-    public function getUserGroups(User $user): array
+        if ($isAdmin != 'admin') {
+
+            return ['message' => 'Unauthorized. Only the group admin can access this resource.', 'code' => 403];
+        }
+
+        if (!$group->users->contains($user->id)) {
+            throw new Exception("user not found in group");
+        }
+
+        $userRole = $group->users()->where('user_id', $user->id)->first()->pivot->role;
+        if ($userRole === 'admin') {
+            throw new Exception("Cannot remove the admin of the group");
+        }
+
+        $group->users()->detach($user->id);
+
+        return ['message' => 'User removed from the group successfully', 'code' => 200];
+    }
+    public function getGroups(User $user): array
     {
 
         return [
@@ -147,5 +171,15 @@ class UserService
             'message' => 'Groups retrieved successfully for the user',
         ];
     }
+    public function getOperations(User $user): array
+    {
+        $operations = $user->locks()->paginate(20);
+        return [
+            'operations' => operationsResource::collection($operations),
+            'message' => 'All operations by this user.'
+        ];
+    }
+
+
 
 }

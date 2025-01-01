@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\FileOperationsExport;
 use App\Http\Requests\Check_inRequest;
 use App\Http\Requests\Check_outRequest;
 use App\Http\Requests\FileRequest;
@@ -13,6 +14,8 @@ use App\Http\Responses\Response;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Maatwebsite\Excel\Excel as ExcelExcel;
+use Maatwebsite\Excel\Facades\Excel;
 use Throwable;
 class FilesController extends Controller
 {
@@ -165,12 +168,14 @@ class FilesController extends Controller
         }
     }
 
-    public function getOperationsAsCSV(){
-
+    public function getOperationsAsCSV(Group $group, File $file){
+        return Excel::download(new FileOperationsExport($file),"$file->name-operations.csv",ExcelExcel::CSV,[
+            'Content-Type' => 'text/csv',
+      ]);
     }
 
-    public function getOperationsAsPDF(){
-        
+    public function getOperationsAsPDF(Group $group, File $file){
+        return Excel::download(new FileOperationsExport($file),"$file->name-operations.csv",ExcelExcel::DOMPDF);
     }
 
     

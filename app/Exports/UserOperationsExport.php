@@ -37,7 +37,7 @@ class UserOperationsExport implements FromCollection, WithHeadings, WithColumnWi
 
     public function headings(): array
     {
-        return ["file","change","date"];
+        return ["file","edit","edited_at"];
     }
 
     public function columnWidths(): array

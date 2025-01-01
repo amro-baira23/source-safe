@@ -1,12 +1,17 @@
 <?php
 
+use App\Exports\UserOperationsExport;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FilesController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Maatwebsite\Excel\Excel as ExcelExcel;
+use Maatwebsite\Excel\Facades\Excel;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,7 +51,7 @@ Route::middleware(['jwt_auth:access','LoggingAspect'])
             Route::post("/groups/{group}/users/{user}","removeFromGroup");
             Route::get("/groups/{group}/users/{user}/operations","getOperations");
             Route::get("/groups/{group}/users/{user}/operations/csv","getOperationsAsCSV");
-            Route::get("/groups/{group}/users/{user}/operations/pdf","getOperationsAsCSV");
+            Route::get("/groups/{group}/users/{user}/operations/pdf","getOperationsAsPDF");
         });
 });
 
@@ -89,7 +94,7 @@ Route::middleware(['jwt_auth:access',"LoggingAspect"])
             Route::post("/groups/{group}/files/check_out","check_out");
             Route::get("/groups/{group}/files/{file}/operations","getOperations");
             Route::get("/groups/{group}/files/{file}/operations/csv","getOperationsAsCSV");
-            Route::get("/groups/{group}/files/{file}/operations/pdf","getOperationsAsCSV");
+            Route::get("/groups/{group}/files/{file}/operations/pdf","getOperationsAsPDF");
         });
 });
 
@@ -99,8 +104,8 @@ Route::middleware("jwt_auth:access")
         Route::post("notify","sendFcmNotification");
 });
 
-Route::middleware("jwt_auth:access")->post("/test/{user}",function (Request $request) {
-    abort(403,"hi there");
+Route::get("/test",function (Request $request) {
+    
+    return Excel::download(new UserOperationsExport(User::first()),"amro.html",ExcelExcel::HTML);
 
-    return collect(["amro", "khaled", "mousab"]);
 });

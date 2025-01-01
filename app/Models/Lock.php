@@ -37,4 +37,8 @@ class Lock extends Model
         $path = "/projects_files/$group->name$group->id/{$this->file->path}__$this->Version_number.$this->type";
         return Storage::get($path);
     }
+
+    protected function serializeDate($date) {
+        return $date->format("Y-m-h H:i");
+    }
 }

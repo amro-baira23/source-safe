@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\UserOperationsExport;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Responses\Response;
 use App\Models\Group;
 use Illuminate\Http\JsonResponse;
+use Maatwebsite\Excel\Excel as ExcelExcel;
+use Maatwebsite\Excel\Facades\Excel;
 use Throwable;
 
 class UserController extends Controller
@@ -93,12 +96,14 @@ class UserController extends Controller
     }
 
     
-    public function getOperationsAsCSV(){
-
+    public function getOperationsAsCSV(Group $group, User $user){
+        return Excel::download(new UserOperationsExport($user),"$user->username.csv",ExcelExcel::CSV,[
+            'Content-Type' => 'text/csv',
+      ]);
     }
 
-    public function getOperationsAsPDF(){
-        
+    public function getOperationsAsPDF(Group $group, User $user){
+        return Excel::download(new UserOperationsExport($user),"$user->username.pdf",ExcelExcel::DOMPDF);
     }
 
 }

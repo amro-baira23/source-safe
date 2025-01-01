@@ -159,7 +159,7 @@ class FilesController extends Controller
     {
         try {
             $result = $this->FileService->getFileOperations($file);
-            return Response::Success($result['operations'], $result['message'], withPagination: true);
+            return Response::Success($result['operations'], $result['message'], );
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage());
         }

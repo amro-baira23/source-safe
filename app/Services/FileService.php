@@ -296,7 +296,7 @@ class FileService
     {
         $operations = $file->locks()->paginate(20);
         return [
-            'operations' => operationsResource::collection($operations),
+            'operations' => ($operations),
             'message' => 'All operations on this file.'
         ];
     }

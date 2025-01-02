@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class Check_outRequest extends FormRequest
+class CheckInRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,10 @@ class Check_outRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file_id' => 'required|integer|exists:files,id',
-            'file' => 'required|file',
+            'files' => 'required|array',
+            'files.*.file_id' => 'required|integer|exists:files,id',
+            'files.*.version' => 'required|integer',
+           // 'version' => 'required|integer|exists:locks,Version_number',
         ];
     }
 }

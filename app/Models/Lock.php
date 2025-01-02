@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
-use Stringable;
+use Illuminate\Support\Str;
+
 
 class Lock extends Model
 {
@@ -34,7 +35,9 @@ class Lock extends Model
 
     public function getFileContent(){
         $group = $this->file->group;
-        $path = "/projects_files/$group->name$group->id/{$this->file->path}__$this->Version_number.$this->type";
+        $basename = Str::of(basename($this->file->name))->beforeLast(".");
+        dump($basename);
+        $path = "/projects_files/$group->name$group->id/{$basename}__$this->Version_number.$this->type";
         return Storage::get($path);
     }
 

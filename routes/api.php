@@ -6,6 +6,9 @@ use App\Http\Controllers\FilesController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
+use App\Models\File;
+use App\Models\Group;
+use App\Models\Lock;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -89,9 +92,9 @@ Route::middleware(['jwt_auth:access',"LoggingAspect"])
             Route::get("/groups/{group}/files/{file}","show");
             Route::get("/groups/{group}/files/{file}/versions","getAvailableFilesWithVersions");
             Route::get("/groups/{group}/files/{file}/download","download");
-            Route::post("/groups/{group}/files/","store_file");
-            Route::post("/groups/{group}/files/check_in","check_in");
-            Route::post("/groups/{group}/files/check_out","check_out");
+            Route::post("/groups/{group}/files/","store");
+            Route::post("/groups/{group}/files/check_in","checkIn");
+            Route::post("/groups/{group}/files/check_out","checkOut");
             Route::get("/groups/{group}/files/{file}/operations","getOperations");
             Route::get("/groups/{group}/files/{file}/operations/csv","getOperationsAsCSV");
             Route::get("/groups/{group}/files/{file}/operations/pdf","getOperationsAsPDF");
@@ -104,8 +107,7 @@ Route::middleware("jwt_auth:access")
         Route::post("notify","sendFcmNotification");
 });
 
-Route::get("/test",function (Request $request) {
-    
+Route::get("/test/{group}/{user}",function (User $u,Group $group,$user) {
+    dump(User::all());
     return Excel::download(new UserOperationsExport(User::first()),"amro.html",ExcelExcel::HTML);
-
 });

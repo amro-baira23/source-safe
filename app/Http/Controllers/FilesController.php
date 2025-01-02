@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Exports\FileOperationsExport;
-use App\Http\Requests\Check_inRequest;
 use App\Http\Requests\Check_outRequest;
+use App\Http\Requests\CheckInRequest;
+use App\Http\Requests\CheckOutRequest;
+use App\Http\Requests\FileDownloadRequest;
 use App\Http\Requests\FileRequest;
 use App\Http\Resources\FileResource;
 use Illuminate\Http\Request;
@@ -46,18 +48,17 @@ class FilesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store_file(FileRequest $request, Group $group): JsonResponse
+    public function store(FileRequest $request, Group $group): JsonResponse
     {
         $data = [];
         try {
-            $data = $this->FileService->store_file($request, $group);
+            $data = $this->FileService->store($request, $group);
             return Response::Success(new FileResource($data['file']), $data['message']);
 
         } catch(Throwable $th){
             $message = $th->getMessage();
             return Response::Error($data,$message );
         }
-        //  return new  FileResource($file);
     }
 
     /**
@@ -70,7 +71,7 @@ class FilesController extends Controller
     }
 
 
-    public function download(Request $request,Group $group,File $file){
+    public function download(FileDownloadRequest $request,Group $group,File $file){
 
         $data = [];
         try {
@@ -86,16 +87,15 @@ class FilesController extends Controller
 
 
 
-    public function check_in(Check_inRequest $request , Group $group)
+    public function checkIn(CheckInRequest $request , Group $group)
     {
         $result = [];
         try {
-            $result = $this->FileService->check_in($request->input('files'), $group);
+            $result = $this->FileService->checkIn($request->input('files'), $group);
 
             if (!empty($result['zip_path'])) {
                return response()->download($result['zip_path']);
             }
-
             return Response::Success($result['files'], $result['message']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
@@ -103,7 +103,7 @@ class FilesController extends Controller
         }
     }
 
-    public function check_out(Check_outRequest $request ,Group $group): JsonResponse
+    public function checkOut(CheckOutRequest $request ,Group $group): JsonResponse
     {
         $data = [];
         try {
@@ -175,7 +175,7 @@ class FilesController extends Controller
     }
 
     public function getOperationsAsPDF(Group $group, File $file){
-        return Excel::download(new FileOperationsExport($file),"$file->name-operations.csv",ExcelExcel::DOMPDF);
+        return Excel::download(new FileOperationsExport($file),"$file->name-operations.pdf",ExcelExcel::DOMPDF);
     }
 
     

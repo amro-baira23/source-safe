@@ -5,7 +5,7 @@ namespace App\Http\Responses;
 
 use Illuminate\Http\JsonResponse;
 
-class Response{
+class Response {
 
     public static function Success($data, $message, $code=200, $withPagination = false): JsonResponse
     {

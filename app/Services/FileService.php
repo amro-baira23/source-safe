@@ -3,68 +3,62 @@
 namespace App\Services;
 
 use App\Http\Repositories\FileRepository;
+use App\Http\Repositories\LockRepository;
 use App\Http\Resources\FileResource;
 use App\Http\Resources\LockResource;
-use App\Http\Resources\operationsResource;
 use App\Jobs\TrackFileChanges;
 use App\Models\File;
 use App\Models\Lock;
 use App\Models\Group;
-use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
-use PHPUnit\Event\Code\Throwable;
 use ZipArchive;
 
 
 class FileService
 {
-    private FileRepository $fileRepositry;
+    private FileRepository $fileRepository;
+    private LockRepository $lockRepository;
 
     public function __construct()
     {
-        $this->fileRepositry = new FileRepository();
+        $this->fileRepository = new FileRepository();
+        $this->lockRepository = new LockRepository;
     }
 
     public function indexPerGroup($request,  Group $group){
-        $files = $this->fileRepositry->indexPerGroup($request,$group);
+        $files = $this->fileRepository->indexPerGroup($request,$group);
         return [
             "files" => FileResource::collection($files),
             "message" => "group \"$group->name\" files"
         ];
     }
 
-    public function store_file(Request $request, Group $group): array {
+    public function store(Request $request, Group $group): array {
 
-        $is_admin = $group->isAdmin(auth()->user());
+        $is_group_admin = $group->isAdmin(auth()->user());
+        $file_upload = $request->file("path");
+        $file_extention = $file_upload->guessClientExtension();
+        $file_basename  = basename($file_upload->getClientOriginalName(),".$file_extention");
 
-        $file_storage_name  = Str::random(40);
-        $file = $request->file("path");
+        dump($file_basename);
+        $file_upload->storeAs("projects_files/" . ($group->name . $group->id) , $file_basename . "__1" .".". $file_extention);
 
-        $file->storeAs("projects_files/" . ($group->name . $group->id) , $file_storage_name . "__1" .".". $file->guessExtension());
-
-        if (!$is_admin) {
-            $file = $this->fileRepositry->store($file->getClientOriginalName(), $file_storage_name, $group->id);
+        if (!$is_group_admin) {
+            $file = $this->fileRepository->store($file_upload->getClientOriginalName(),$group);
             return [
                 'file' => $file,
                 'message' => ' File created successfully by member ',
             ];
         }
 
-        $file = $this->fileRepositry->store($file->getClientOriginalName(), $file_storage_name, $group->id, 1);
+        $file = $this->fileRepository->storeActivated($file_upload->getClientOriginalName(), $group);
 
-        Lock::create([
-            'user_id' => auth()->user()->id,
-            'file_id' => $file->id,
-            'status' => 0 ,
-            'type' => $request['path']->extension(),
-            'size' => $request['path']->getsize(),
-            'Version_number' => 1,
-            'date'=> now(),
-        ]);
+        $this->lockRepository->firstCommit($file, $request->file("path"));
 
         return [
             'file' => $file,
@@ -80,7 +74,7 @@ class FileService
             $file_type = $file->locks()->orderBy("created_at","desc")->first()->type;
         } else {
             $file_type = $file->locks()
-            ->where("file_id",$file->id)
+            ->where("Version_number",$required_version)
             ->orderBy("created_at","desc")->first()->type;
         }
         $file_name = "projects_files/$group->name$group->id/{$file->path}__{$required_version}.{$file_type}";
@@ -90,68 +84,52 @@ class FileService
     }
 
 
-    public function check_in(array $files, Group $group): array
+    public function checkIn(array $files, Group $group): array
     {
         $userId = auth()->id();
         $fileIds = collect($files)->pluck('file_id');
         $downloadedFilePaths = [];
 
-        try {
-            DB::transaction(function () use ($files, $fileIds, $userId, &$downloadedFilePaths) {
-                $fileRecords = File::whereIn('id', $fileIds)
-                    ->where('status', 0)
-                    ->where('active', 1)
-                    ->lockForUpdate()
-                    ->get();
+    
+        DB::transaction(function () use ($files, $fileIds, $userId, &$downloadedFilePaths) {
+            $fileRecords = $this->reserveFiles($fileIds);
 
-                if ($fileRecords->count() !== count($fileIds)) {
-                    throw new \Exception('One or more files are either reserved or not approved by admin.');
+            foreach ($files as $file) {
+                $fileId = $file['file_id'];
+                $version = $file['version'];
+
+                // Find the specific file and version
+                $fileRecord = $fileRecords->where('id', $fileId)->first();
+                $versionRecord = Lock::where('file_id', $fileId)
+                    ->where('Version_number', $version)
+                    ->first();
+
+                if (!$versionRecord) {
+                    throw new \Exception("Requested version {$version} does not exist for file {$fileRecord->name}.");
                 }
 
-                foreach ($files as $file) {
-                    $fileId = $file['file_id'];
-                    $version = $file['version'];
+                $storagePath = "projects_files/" . ($fileRecord->group->name . $fileRecord->group->id) . "/" . $fileRecord->basename() . "__" . $version . '.' . $versionRecord->type;
 
-                    // Find the specific file and version
-                    $fileRecord = $fileRecords->where('id', $fileId)->first();
-                    $versionRecord = Lock::where('file_id', $fileId)
-                        ->where('Version_number', $version)
-                        ->first();
-
-                    if (!$versionRecord) {
-                        throw new \Exception("Requested version {$version} does not exist for file {$fileRecord->name}.");
-                    }
-
-                    $storagePath = "projects_files/" . ($fileRecord->group->name . $fileRecord->group->id) . "/" . $fileRecord->path . "__" . $version . '.' . $versionRecord->type;
-
-                    if (Storage::exists($storagePath)) {
-                        $downloadedFilePaths[] = $storagePath;
-                    }
-
-                    $fileRecord->status = 1;
-                    $fileRecord->save();
-
-                    Lock::create([
-                        'user_id' => $userId,
-                        'file_id' => $fileId,
-                        'status' => 1,
-                        'type' => $versionRecord->type,
-                        'size' => $versionRecord->size,
-                        'Version_number' => $version,
-                        'date' => now(),
-                    ]);
+                if (Storage::exists($storagePath)) {
+                    $downloadedFilePaths[] = $storagePath;
                 }
-            });
-        } catch (Exception $e) {
-            return [
-                'message' => $e->getMessage(),
-                'files' => null,
-                'zip_path' => null,
-            ];
-        }
 
+                $fileRecord->status = 1;
+                $fileRecord->save();
+
+                Lock::create([
+                    'user_id' => $userId,
+                    'file_id' => $fileId,
+                    'status' => 1,
+                    'type' => $versionRecord->type,
+                    'size' => $versionRecord->size,
+                    'Version_number' => $version,
+                ]);
+            }
+        });
+    
         $zipFileName = 'files_' . now()->timestamp . '.zip';
-        $zipFilePath = $this->downloadFilesAsZip($downloadedFilePaths, $zipFileName);
+        $zipFilePath = $this->createZipFile($downloadedFilePaths, $zipFileName);
 
         return [
             'message' => 'Files downloaded successfully',
@@ -159,8 +137,21 @@ class FileService
         ];
     }
 
+    private function reserveFiles(Collection $fileIds) {
+        $fileRecords = File::whereIn('id', $fileIds)
+            ->where('status', 0)
+            ->where('active', 1)
+            ->lockForUpdate()
+            ->get();
 
-    private function downloadFilesAsZip(array $filePaths, string $zipFileName): string
+        if ($fileRecords->count() !== count($fileIds)) {
+            throw new \Exception('One or more files are either reserved or not approved by admin.');
+        }
+        
+        return $fileRecords; 
+    }
+
+    private function createZipFile(array $filePaths, string $zipFileName): string
     {
         $zipPath = storage_path("app/Downloads/{$zipFileName}");
 
@@ -224,11 +215,10 @@ class FileService
             'type' => $uploadedFile->extension(),
             'size' => $uploadedFile->getSize(),
             'Version_number' => $lastLockVersoin->Version_number + 1,
-            'date' => now(),
         ]);
 
         $storagePath = "projects_files/" . ($file->group->name . $file->group->id);
-        $uploadedFile->storeAs($storagePath, $file->path . '__'. ($lastLockVersoin->Version_number + 1) . '.' . $uploadedFile->extension());
+        $uploadedFile->storeAs($storagePath, $file->basename() . '__'. ($lastLockVersoin->Version_number + 1) . '.' . $uploadedFile->extension());
         TrackFileChanges::dispatchSync($lock);
         return [
             'files' => new FileResource($file),
@@ -259,7 +249,7 @@ class FileService
 
     public function getAllFiles($request)
     {
-        $files = $this->fileRepositry->index($request);
+        $files = $this->fileRepository->index($request);
         return [
             "data" => FileResource::collection($files),
             "message" => "all files",

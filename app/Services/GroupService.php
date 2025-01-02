@@ -2,18 +2,12 @@
 
 namespace App\Services;
 
-use App\Http\Resources\GroupResource;
 use App\Http\Resources\GroupUserResource;
 use App\Http\Resources\JoinRequestsResource;
-use App\Http\Resources\operationsResource;
 use App\Models\Group;
 use App\Models\User;
-use Exception;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\URL;
 
 class GroupService
 {

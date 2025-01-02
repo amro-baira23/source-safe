@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Group;
 use App\Models\User;
 use Google\Client;
-use Google_Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -66,8 +64,6 @@ class NotificationController extends Controller
             ]
         ];
         $payload = json_encode($data);
-        dd($headers);
-        dd($payload);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send");
         curl_setopt($ch, CURLOPT_POST, true);

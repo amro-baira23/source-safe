@@ -14,7 +14,6 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
 
@@ -26,7 +25,7 @@ class FileService
 
     public function __construct()
     {
-        $this->fileRepository = new FileRepository();
+        $this->fileRepository = new FileRepository;
         $this->lockRepository = new LockRepository;
     }
 
@@ -170,7 +169,7 @@ class FileService
         return $zipPath;
     }
 
-    public function check_out(Request $request , Group $group): array
+    public function checkOut(Request $request , Group $group): array
     {
         $fileId = $request->input('file_id');
         $userId = auth()->id();

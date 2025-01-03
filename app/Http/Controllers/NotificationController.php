@@ -46,7 +46,7 @@ class NotificationController extends Controller
         $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
         $client->fetchAccessTokenWithAssertion();
         $token = $client->getAccessToken();
-
+        dump($token);
         $access_token = $token['access_token'];
 
         $headers = [

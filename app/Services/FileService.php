@@ -44,7 +44,6 @@ class FileService
         $file_extention = $file_upload->guessClientExtension();
         $file_basename  = basename($file_upload->getClientOriginalName(),".$file_extention");
 
-        dump($file_basename);
         $file_upload->storeAs("projects_files/" . ($group->name . $group->id) , $file_basename . "__1" .".". $file_extention);
 
         if (!$is_group_admin) {
@@ -169,56 +168,28 @@ class FileService
         return $zipPath;
     }
 
-    public function checkOut(Request $request , Group $group): array
+    public function checkOut(Request $request ): array
     {
-        $fileId = $request->input('file_id');
-        $userId = auth()->id();
         $uploadedFile = $request->file('file');
-
-        $file = File::where('id', $fileId)->where('status', 1)->first();
-        if (!$file) {
-            return [
-                'files' => null,
-                'message' => 'The selected file is either not reserved or not active',
-            ];
-        }
-
-
-        $lastLock = Lock::where('file_id', $file->id)->latest()->first();
-
-        $lastLockVersoin = Lock::where('file_id', $file->id)->where('status', 0)->latest()->first();
-        //  the same user check_in
-        if (!$lastLock || $lastLock->user_id !== $userId || $lastLock->status !== 1) {
-            return [
-                'files' => null,
-                'message' => 'You do not have permission to check out this file',
-            ];
-        }
-
-        // التحقق من أن اسم الملف المرفوع يطابق اسم الملف في النظام
-        $fileBaseName = pathinfo($file->name, PATHINFO_FILENAME);
-        if (pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME) !== $fileBaseName) {
-            return [
-                'files' => null,
-                'message' => "Uploaded file name does not match the file name in the system ({$file->name})",
-            ];
-        }
+        $file = File::where('id', $request->file_id)->where('status', 1)->first();
+        $lastLockVersion = Lock::where('file_id', $file->id)->where('status', 0)->latest()->first();
 
         $file->status = 0;
         $file->save();
 
-        $lock = Lock::create([
-            'user_id' => $userId,
-            'file_id' => $file->id,
-            'status' => 0, // check-out status
-            'type' => $uploadedFile->extension(),
-            'size' => $uploadedFile->getSize(),
-            'Version_number' => $lastLockVersoin->Version_number + 1,
+        $lock = $this->lockRepository->checkOut(...[
+            "file_model" => $file,
+            "previous_lock" => $lastLockVersion,
+            "file_upload" => $uploadedFile,
         ]);
 
-        $storagePath = "projects_files/" . ($file->group->name . $file->group->id);
-        $uploadedFile->storeAs($storagePath, $file->basename() . '__'. ($lastLockVersoin->Version_number + 1) . '.' . $uploadedFile->extension());
-        TrackFileChanges::dispatchSync($lock);
+        if ($uploadedFile){            
+            $storagePath = "projects_files/" . ($file->group->name . $file->group->id);
+            $uploadedFile->storeAs($storagePath, $file->basename() . '__'. ($lastLockVersion->Version_number + 1) . '.' . $uploadedFile->extension());
+            
+            TrackFileChanges::dispatchSync($lock);
+        }
+
         return [
             'files' => new FileResource($file),
             'message' => 'File successfully checked out',

@@ -36,7 +36,6 @@ class Lock extends Model
     public function getFileContent(){
         $group = $this->file->group;
         $basename = Str::of(basename($this->file->name))->beforeLast(".");
-        dump($basename);
         $path = "/projects_files/$group->name$group->id/{$basename}__$this->Version_number.$this->type";
         return Storage::get($path);
     }

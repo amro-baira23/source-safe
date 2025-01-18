@@ -107,7 +107,7 @@ class FilesController extends Controller
     {
         $data = [];
         try {
-            $data = $this->FileService->checkOut($request,$group);
+            $data = $this->FileService->checkOut($request);
             return Response::Success($data['files'], $data['message']);
 
         } catch(Throwable $th){

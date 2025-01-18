@@ -27,7 +27,7 @@ class UserOperationsExport implements FromCollection, WithHeadings, WithColumnWi
     {
         $collection = $collection = DB::table("locks")
             ->select("files.name as file", "locks.change","locks.created_at as date")
-            ->where("user_id",1)
+            ->where("user_id",request("user"))
             ->join("files","locks.file_id","files.id")
             ->orderBy("locks.created_at","desc")
             ->get(); 

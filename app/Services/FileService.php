@@ -44,7 +44,7 @@ class FileService
         $file_extention = $file_upload->guessClientExtension();
         $file_basename  = basename($file_upload->getClientOriginalName(),".$file_extention");
 
-        dump($file_basename);
+        // dump($file_basename);
         $file_upload->storeAs("projects_files/" . ($group->name . $group->id) , $file_basename . "__1" .".". $file_extention);
 
         if (!$is_group_admin) {

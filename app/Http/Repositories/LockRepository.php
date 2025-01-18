@@ -24,7 +24,7 @@ class LockRepository {
             'status' => 0 ,
             'type' => $file_upload?->extension() ?? $previous_lock->type,
             'size' => $file_upload?->getsize() ?? $previous_lock->size,
-            'Version_number' => $previous_lock->Version_number + 1,
+            'Version_number' => $previous_lock->Version_number + (is_null($file_upload) ? 0 : 1),
         ]);
     }
 }

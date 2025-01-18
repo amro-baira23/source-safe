@@ -72,10 +72,11 @@ class FileService
             $file_type = $file->locks()->orderBy("created_at","desc")->first()->type;
         } else {
             $file_type = $file->locks()
-            ->where("Version_number",$required_version)
-            ->orderBy("created_at","desc")->first()->type;
+                ->where("Version_number",$required_version)
+                ->orderBy("created_at","desc")->first()->type;
         }
-        $file_name = "projects_files/$group->name$group->id/{$file->path}__{$required_version}.{$file_type}";
+        $file_basename = basename($file->name,"." . $file_type);
+        $file_name = "projects_files/$group->name$group->id/{$file_basename}__{$required_version}.{$file_type}";
         if (!Storage::exists($file_name))
             throw new Exception("file doesn't exist",422);
         return storage_path("app/$file_name");

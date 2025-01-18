@@ -11,15 +11,13 @@ class FileRepository {
         return File::where("group_id",$group->id)
         ->when($request->name,function($query, $value) {
             return $query->where("name","like","%$value%");
-        })
-        ->paginate(15);
+        })->paginate(15);
     }
 
     public function index($request){
         return File::when($request->name,function($query, $value) {
             return $query->where("name","like","%$value%");
-        })
-        ->paginate(15);
+        })->paginate(15);
     }
 
    

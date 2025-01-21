@@ -108,7 +108,6 @@ Route::middleware("jwt_auth:access")
         Route::post("notify","sendFcmNotification");
 });
 
-Route::get("/test/{group}/{user}",function (User $u,Group $group,$user) {
-    dump(User::all());
+Route::middleware("jwt_auth:access")->get("/test/{group}/{thing}",function (User $u,Group $group,$user) {
     return Excel::download(new UserOperationsExport(User::first()),"amro.html",ExcelExcel::HTML);
 });

@@ -32,10 +32,9 @@ class TrackFileChanges implements ShouldQueue
      */
     public function handle(): void
     {
-        $previous_version = Lock::where("created_at","<",$this->version->created_at)->orderBy("created_at","desc")->first();
+        $previous_version = Lock::where("created_at","<",$this->version->created_at)
+            ->orderBy("created_at","desc")->first();
         $differ = new Differ(new UnifiedDiffOutputBuilder());
-        dump($previous_version->getFileContent());
-        dump($previous_version);
         $change = $differ->diff($previous_version->getFileContent(),$this->version->getFileContent());
         $this->version->update(["change" => $change]);
     }

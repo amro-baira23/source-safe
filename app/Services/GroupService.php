@@ -15,10 +15,8 @@ public function store_group(Request $request): array
     {
 
         $group = Group::query()->create([
-        'name'=>$request['name'],
+        'name'=> $request['name'],
         ]);
-
-        $uesrs = User::all();
 
         $group->users()->attach(auth()->id(), ['role' => 'admin', 'approved' => true]);
 

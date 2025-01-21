@@ -15,6 +15,7 @@ use App\Services\FileService;
 use App\Http\Responses\Response;
 use App\Models\Group;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Maatwebsite\Excel\Excel as ExcelExcel;
 use Maatwebsite\Excel\Facades\Excel;
@@ -92,7 +93,9 @@ class FilesController extends Controller
         $result = [];
         try {
             $result = $this->FileService->checkIn($request->input('files'), $group);
-
+            $files_ids = collect($request->input("files"))->pluck("file_id");
+            $data_load = File::whereIn("id",$files_ids)->get()->pluck("name")->implode(", ");
+            session(["data" => $data_load]);
             if (!empty($result['zip_path'])) {
                return response()->download($result['zip_path']);
             }
@@ -108,6 +111,7 @@ class FilesController extends Controller
         $data = [];
         try {
             $data = $this->FileService->checkOut($request);
+            session(["data" => File::find($request->file_id)->name]);
             return Response::Success($data['files'], $data['message']);
 
         } catch(Throwable $th){

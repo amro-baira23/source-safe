@@ -1,16 +1,12 @@
 <?php
 
-use App\Exports\UserOperationsExport;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FilesController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
 use App\Models\Group;
-use App\Models\User;
 use Illuminate\Support\Facades\Route;
-use Maatwebsite\Excel\Excel as ExcelExcel;
-use Maatwebsite\Excel\Facades\Excel;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,7 +55,7 @@ Route::middleware(['jwt_auth:access',"LoggingAspect"])
         Route::post("/store_group","store_group");
         Route::get("/index_group","index_group");
 
-        Route::middleware('AuthAspect:admin')->group(function() {
+        Route::middleware('AuthAspect:admin',)->group(function() {
             Route::get('/groups','getAllGroups');
             Route::post('/groups/{group}/delete_with_files','deleteGroupWithFiles');
             Route::post('/groups/{group}/soft_delete','softDeleteGroup');
@@ -89,8 +85,10 @@ Route::middleware(['jwt_auth:access',"LoggingAspect"])
             Route::get("/groups/{group}/files/{file}/versions","getAvailableFilesWithVersions");
             Route::get("/groups/{group}/files/{file}/download","download");
             Route::post("/groups/{group}/files/","store");
-            Route::post("/groups/{group}/files/check_in","checkIn");
-            Route::post("/groups/{group}/files/check_out","checkOut");
+            Route::post("/groups/{group}/files/check_in","checkIn")
+                ->middleware("event-aspect:check-in");
+            Route::post("/groups/{group}/files/check_out","checkOut")
+                ->middleware("event-aspect:check-in");
             Route::get("/groups/{group}/files/{file}/operations","getOperations");
             Route::get("/groups/{group}/files/{file}/operations/csv","getOperationsAsCSV");
             Route::get("/groups/{group}/files/{file}/operations/pdf","getOperationsAsPDF");
@@ -103,6 +101,7 @@ Route::middleware("jwt_auth:access")
         Route::post("notify","sendFcmNotification");
 });
 
-Route::middleware("jwt_auth:access")->get("/test/{group}/{thing}",function (User $u,Group $group,$user) {
-    return Excel::download(new UserOperationsExport(User::first()),"amro.html",ExcelExcel::HTML);
+Route::middleware("jwt_auth:access")->post("/test/{group}",function (Group $group) {
+    // SendNotificationToUsersJob::dispatchSync($group->users()->whereNot("user_id",1)->get());   
+    return "hello world";
 });

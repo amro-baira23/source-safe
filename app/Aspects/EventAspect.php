@@ -1,31 +1,26 @@
 <?php
+
 namespace App\Aspects;
 
+use App\Jobs\SendNotificationToUsersJob;
+use App\Models\File;
+use App\Models\Group;
+use App\Models\User;
+use Closure;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
-use Illuminate\Support\Facades\Event;
-
-
-interface ServiceInterface {
-    public function doSomething();
-}
-
-// Aspect class
-class EventAspect {
-    public function before(ServiceInterface $service, callable $callback) {
-        dump("before");
+class EventAspect extends Aspect
+{
+    public function after(Request $request, Response $response, array $parameters = [])
+    {   
+        SendNotificationToUsersJob::dispatch(
+            group: $request->group ?? "[not found]",
+            user: $request->user(),
+            file: session("data") ?? "",
+            operation: $parameters[0]
+        );
     }
 
-    public function after(ServiceInterface $service, callable $callback) {
-        dump("before");
-    }
 }
-
-// Service implementation
-class MyService implements ServiceInterface {
-    public function doSomething() {
-        // Method logic
-    }
-}
-
-// Register the aspect
-Event::listen('service.*', 'App\LoggingAspect');

@@ -20,7 +20,11 @@ class FileRepository {
         })->paginate(15);
     }
 
-   
+    public function indexNotActive($group){
+        return File::where(["group_id"=>$group->id,"active" => 0 ])->paginate(15);
+    }
+
+
     public function storeActivated(string $name,Group $group){
         return $this->store($name, $group, active: 1);
     }
@@ -32,8 +36,8 @@ class FileRepository {
             "active" => $active,
         ]);
     }
-    
-    
+
+
     public function delete($file){
         return $file->delete();
     }

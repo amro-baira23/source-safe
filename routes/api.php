@@ -39,7 +39,7 @@ Route::middleware(['jwt_auth:access','LoggingAspect'])
 
         Route::middleware('AuthAspect:admin')->group(function() {
             Route::get('/users/{user}/groups', 'getGroups');
-            Route::post('/users/{user}', 'remove');                
+            Route::post('/users/{user}', 'remove');
         });
 
         Route::middleware('AuthAspect:member')->group(function() {
@@ -76,11 +76,16 @@ Route::middleware(['jwt_auth:access',"LoggingAspect"])
 
 Route::middleware(['jwt_auth:access',"LoggingAspect"])
     ->controller(FilesController::class)->group(function () {
-        
+
         Route::middleware('AuthAspect:admin')->group(function() {
             Route::get('/files','getAllFiles');
             Route::post('/files/{file}/delete_with_locks','deleteFileWithLocks');
             Route::post('/files/{file}/soft_delete','softDeleteFile');
+        });
+
+        Route::middleware('AuthAspect:adminGroup')->group(function() {
+            Route::get('/groups/{group}/files/not_active','indexNotActive');
+            Route::post('/groups/{group}/files/{file}/activate','activation');
         });
 
         Route::middleware('AuthAspect:member')->group(function() {

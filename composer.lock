@@ -1010,7 +1010,6 @@
             "time": "2024-11-01T03:51:45+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "fig/http-message-util",
             "version": "1.1.5",
             "source": {
@@ -1076,17 +1075,6 @@
             },
             "dist": {
                 "type": "zip",
-=======
-            "name": "firebase/php-jwt",
-            "version": "v6.10.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/firebase/php-jwt.git",
-                "reference": "30c19ed0f3264cb660ea496895cfb6ef7ee3653b"
-            },
-            "dist": {
-                "type": "zip",
->>>>>>> b40c44fd727c7e907aa0359beb5cfb0641cdc7fa
                 "url": "https://api.github.com/repos/firebase/php-jwt/zipball/30c19ed0f3264cb660ea496895cfb6ef7ee3653b",
                 "reference": "30c19ed0f3264cb660ea496895cfb6ef7ee3653b",
                 "shasum": ""
@@ -1384,7 +1372,6 @@
                 "source": "https://github.com/googleapis/google-auth-library-php/tree/v1.45.0"
             },
             "time": "2024-12-11T02:10:48+00:00"
-<<<<<<< HEAD
         },
         {
             "name": "google/cloud-core",
@@ -1757,8 +1744,6 @@
                 "source": "https://github.com/protocolbuffers/protobuf-php/tree/v4.29.3"
             },
             "time": "2025-01-08T21:00:13+00:00"
-=======
->>>>>>> b40c44fd727c7e907aa0359beb5cfb0641cdc7fa
         },
         {
             "name": "graham-campbell/result-type",
@@ -2278,7 +2263,6 @@
             "time": "2023-12-03T19:50:20+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "kreait/firebase-php",
             "version": "7.10.0",
             "source": {
@@ -2536,17 +2520,6 @@
             },
             "dist": {
                 "type": "zip",
-=======
-            "name": "laravel/framework",
-            "version": "v10.48.25",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/laravel/framework.git",
-                "reference": "f132b23b13909cc22c615c01b0c5640541c3da0c"
-            },
-            "dist": {
-                "type": "zip",
->>>>>>> b40c44fd727c7e907aa0359beb5cfb0641cdc7fa
                 "url": "https://api.github.com/repos/laravel/framework/zipball/f132b23b13909cc22c615c01b0c5640541c3da0c",
                 "reference": "f132b23b13909cc22c615c01b0c5640541c3da0c",
                 "shasum": ""
@@ -4119,7 +4092,6 @@
             "time": "2023-05-03T06:19:36+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "mtdowling/jmespath.php",
             "version": "2.8.0",
             "source": {
@@ -4195,17 +4167,6 @@
             },
             "dist": {
                 "type": "zip",
-=======
-            "name": "myclabs/deep-copy",
-            "version": "1.12.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/myclabs/DeepCopy.git",
-                "reference": "123267b2c49fbf30d78a7b2d333f6be754b94845"
-            },
-            "dist": {
-                "type": "zip",
->>>>>>> b40c44fd727c7e907aa0359beb5cfb0641cdc7fa
                 "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/123267b2c49fbf30d78a7b2d333f6be754b94845",
                 "reference": "123267b2c49fbf30d78a7b2d333f6be754b94845",
                 "shasum": ""
@@ -8511,7 +8472,6 @@
             "time": "2024-11-08T15:28:48+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "symfony/var-exporter",
             "version": "v7.2.0",
             "source": {
@@ -8597,17 +8557,6 @@
             },
             "dist": {
                 "type": "zip",
-=======
-            "name": "tijsverkoyen/css-to-inline-styles",
-            "version": "v2.3.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/tijsverkoyen/CssToInlineStyles.git",
-                "reference": "0d72ac1c00084279c1816675284073c5a337c20d"
-            },
-            "dist": {
-                "type": "zip",
->>>>>>> b40c44fd727c7e907aa0359beb5cfb0641cdc7fa
                 "url": "https://api.github.com/repos/tijsverkoyen/CssToInlineStyles/zipball/0d72ac1c00084279c1816675284073c5a337c20d",
                 "reference": "0d72ac1c00084279c1816675284073c5a337c20d",
                 "shasum": ""

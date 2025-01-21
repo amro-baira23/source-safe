@@ -89,7 +89,7 @@ class FileService
         $fileIds = collect($files)->pluck('file_id');
         $downloadedFilePaths = [];
 
-    
+
         DB::transaction(function () use ($files, $fileIds, $userId, &$downloadedFilePaths) {
             $fileRecords = $this->reserveFiles($fileIds);
 
@@ -126,7 +126,7 @@ class FileService
                 ]);
             }
         });
-    
+
         $zipFileName = 'files_' . now()->timestamp . '.zip';
         $zipFilePath = $this->createZipFile($downloadedFilePaths, $zipFileName);
 
@@ -146,8 +146,8 @@ class FileService
         if ($fileRecords->count() !== count($fileIds)) {
             throw new \Exception('One or more files are either reserved or not approved by admin.');
         }
-        
-        return $fileRecords; 
+
+        return $fileRecords;
     }
 
     private function createZipFile(array $filePaths, string $zipFileName): string
@@ -184,10 +184,10 @@ class FileService
             "file_upload" => $uploadedFile,
         ]);
 
-        if ($uploadedFile){            
+        if ($uploadedFile){
             $storagePath = "projects_files/" . ($file->group->name . $file->group->id);
             $uploadedFile->storeAs($storagePath, $file->basename() . '__'. ($lastLockVersion->Version_number + 1) . '.' . $uploadedFile->extension());
-            
+
             TrackFileChanges::dispatchSync($lock);
         }
 
@@ -259,6 +259,26 @@ class FileService
         return [
             'operations' => ($operations),
             'message' => 'All operations on this file.'
+        ];
+    }
+
+    public function indexWithNotActive($group): array
+    {
+        $files = $this->fileRepository->indexWithNotActive($group);
+        return [
+            "data" => FileResource::collection($files),
+            "message" => "Not Active files",
+        ];
+    }
+
+    public function activation($file): array
+    {
+
+        $file->active = 1;
+        $file->save();
+        return [
+            'file' => new FileResource($file),
+            'message' => 'activation successfully'
         ];
     }
 

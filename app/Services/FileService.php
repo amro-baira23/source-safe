@@ -44,7 +44,7 @@ class FileService
         $file_extention = $file_upload->guessClientExtension();
         $file_basename  = basename($file_upload->getClientOriginalName(),".$file_extention");
 
-        dump($file_basename);
+
         $file_upload->storeAs("projects_files/" . ($group->name . $group->id) , $file_basename . "__1" .".". $file_extention);
 
         if (!$is_group_admin) {
@@ -89,7 +89,7 @@ class FileService
         $fileIds = collect($files)->pluck('file_id');
         $downloadedFilePaths = [];
 
-    
+
         DB::transaction(function () use ($files, $fileIds, $userId, &$downloadedFilePaths) {
             $fileRecords = $this->reserveFiles($fileIds);
 
@@ -126,7 +126,7 @@ class FileService
                 ]);
             }
         });
-    
+
         $zipFileName = 'files_' . now()->timestamp . '.zip';
         $zipFilePath = $this->createZipFile($downloadedFilePaths, $zipFileName);
 
@@ -146,8 +146,8 @@ class FileService
         if ($fileRecords->count() !== count($fileIds)) {
             throw new \Exception('One or more files are either reserved or not approved by admin.');
         }
-        
-        return $fileRecords; 
+
+        return $fileRecords;
     }
 
     private function createZipFile(array $filePaths, string $zipFileName): string
@@ -287,6 +287,26 @@ class FileService
         return [
             'operations' => ($operations),
             'message' => 'All operations on this file.'
+        ];
+    }
+
+    public function indexNotActive($group): array
+    {
+        $files = $this->fileRepository->indexNotActive($group);
+        return [
+            "data" => FileResource::collection($files),
+            "message" => "Not Active files",
+        ];
+    }
+
+    public function activation($file): array
+    {
+        
+        $file->active = 1;
+        $file->save();
+        return [
+            'file' => ($file),
+            'message' => 'activation successfully'
         ];
     }
 

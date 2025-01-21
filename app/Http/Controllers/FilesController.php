@@ -178,5 +178,22 @@ class FilesController extends Controller
         return Excel::download(new FileOperationsExport($file),"$file->name-operations.pdf",ExcelExcel::DOMPDF);
     }
 
-    
+
+    public function indexNotActive( Group $group): JsonResponse
+    {
+        $data = $this->FileService->indexNotActive($group);
+        return Response::Success($data["data"],$data["message"],withPagination: true);
+    }
+
+    public function activation(Group $group,File $file): JsonResponse
+    {
+        try {
+            $result = $this->FileService->activation($file);
+            return Response::Success($result['file'], $result['message'], );
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage());
+        }
+    }
+
+
 }

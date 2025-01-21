@@ -179,9 +179,9 @@ class FilesController extends Controller
     }
 
 
-    public function indexNotActive( Group $group): JsonResponse
+    public function indexWithNotActive( Group $group): JsonResponse
     {
-        $data = $this->FileService->indexNotActive($group);
+        $data = $this->FileService->indexWithNotActive($group);
         return Response::Success($data["data"],$data["message"],withPagination: true);
     }
 

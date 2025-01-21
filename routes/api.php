@@ -84,7 +84,7 @@ Route::middleware(['jwt_auth:access',"LoggingAspect"])
         });
 
         Route::middleware('AuthAspect:adminGroup')->group(function() {
-            Route::get('/groups/{group}/files/not_active','indexNotActive');
+            Route::get('/groups/{group}/files/withNotActive','indexWithNotActive');
             Route::post('/groups/{group}/files/{file}/activate','activation');
         });
 

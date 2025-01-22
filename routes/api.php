@@ -36,6 +36,13 @@ Route::middleware(['jwt_auth:access','LoggingAspect'])
         Route::middleware('AuthAspect:admin')->group(function() {
             Route::get('/users/{user}/groups', 'getGroups');
             Route::post('/users/{user}', 'remove');
+
+            Route::get('/most-joined-user', 'mostJoinedUser');
+            Route::get('/group-with-most-users', 'groupWithMostUsers');
+            Route::get('/group-with-most-files', 'groupWithMostFiles');
+
+           
+
         });
 
         Route::middleware('AuthAspect:member')->group(function() {
@@ -106,6 +113,6 @@ Route::middleware("jwt_auth:access")
 });
 
 Route::middleware("jwt_auth:access")->post("/test/{group}",function (Group $group) {
-    // SendNotificationToUsersJob::dispatchSync($group->users()->whereNot("user_id",1)->get());   
+    // SendNotificationToUsersJob::dispatchSync($group->users()->whereNot("user_id",1)->get());
     return "hello world";
 });

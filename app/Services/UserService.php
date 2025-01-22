@@ -19,7 +19,7 @@ class UserService
 
     public function __construct()
     {
-        $this->userReporsitory = new UserRepository(); 
+        $this->userReporsitory = new UserRepository();
     }
     public function register ($request) : array
     {
@@ -115,12 +115,12 @@ class UserService
 
     }
 
-    public function index(): array
+    public function index($request): array
     {
-        $users = User::with('roles')->paginate(20);
+        $users = $this->userReporsitory->index($request);
         return [
             'users' => UserResource::collection($users),
-            'message' => 'All users retrieved successfully',
+            'message' => " users successfully",
         ];
     }
 

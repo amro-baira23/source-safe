@@ -36,8 +36,13 @@ Route::middleware(['jwt_auth:access','LoggingAspect'])
         Route::get('/users', 'index');
 
         Route::middleware('AuthAspect:admin')->group(function() {
-            Route::get('/users/{user}/groups', 'getGroups');
             Route::post('/users/{user}', 'remove');
+
+            Route::get('/most_joined_user', 'mostJoinedUser');
+
+
+
+
         });
 
         Route::middleware('AuthAspect:member')->group(function() {
@@ -61,6 +66,9 @@ Route::middleware(['jwt_auth:access',"LoggingAspect"])
             Route::get('/groups','getAllGroups');
             Route::post('/groups/{group}/delete_with_files','deleteGroupWithFiles');
             Route::post('/groups/{group}/soft_delete','softDeleteGroup');
+
+            Route::get('/group_with_most_users', 'groupWithMostUsers');
+            Route::get('/group_with_most_files', 'groupWithMostFiles');
         });
 
         Route::middleware('AuthAspect:member')->group(function() {
@@ -91,10 +99,8 @@ Route::middleware(['jwt_auth:access',"LoggingAspect"])
             Route::get("/groups/{group}/files/{file}/versions","getAvailableFilesWithVersions");
             Route::get("/groups/{group}/files/{file}/download","download");
             Route::post("/groups/{group}/files/","store");
-            Route::post("/groups/{group}/files/check_in","checkIn")
-                ->middleware("event-aspect:check-in");
-            Route::post("/groups/{group}/files/check_out","checkOut")
-                ->middleware("event-aspect:check-in");
+            Route::post("/groups/{group}/files/check_in","checkIn");
+            Route::post("/groups/{group}/files/check_out","checkOut");
             Route::get("/groups/{group}/files/{file}/operations","getOperations");
             Route::get("/groups/{group}/files/{file}/operations/csv","getOperationsAsCSV");
             Route::get("/groups/{group}/files/{file}/operations/pdf","getOperationsAsPDF");

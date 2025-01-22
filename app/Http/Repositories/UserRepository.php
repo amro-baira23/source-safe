@@ -17,6 +17,10 @@ class UserRepository {
     }
 
     public function index($request){
+        $users = User::where("username","LIKE","%$request->username%")
+        ->select(["id","username","email"])
+        ->paginate(20);
+        return $users;
     }
 
     public function store(string $name,string $path,int $group_id,int $active = 0){

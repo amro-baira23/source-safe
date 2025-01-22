@@ -36,10 +36,10 @@ class File extends Model
     }
 
     public function getFullPath($version){
-        $path = storage_path("app/projects_files/{$this->group->name}{$this->group->id}/$this->name" . "__$version");
+        $path = storage_path("app/projects_files/{$this->group->name}{$this->group->id}/$this->getBasename()" . "__$version");
         if (Storage::fileExists($path))
             return $path;
-        return null; 
+        return null;
     }
 
     public function locks()
@@ -47,13 +47,13 @@ class File extends Model
         return $this->hasMany(Lock::class, 'file_id');
     }
 
-    public function basename(){
+    public function getBasename(){
         return Str::of($this->name)->beforeLast(".");
     }
     public function prunable()
     {
         $paths = Storage::allFiles("projects_files");
-        
+
         foreach ($paths as $path){
             $names[] = Str::of(basename($path))->beforeLast("__");
         }

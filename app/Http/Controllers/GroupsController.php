@@ -131,4 +131,30 @@ class GroupsController extends Controller
             return Response::Error([], $th->getMessage());
         }
     }
+
+    public function groupWithMostUsers()
+    {
+        $group = \App\Models\Group::withCount('users')
+            ->orderBy('users_count', 'desc')
+            ->first();
+
+        return response()->json([
+            'group_name' => $group->name,
+            'user_count' => $group->users_count,
+        ]);
+    }
+
+    public function groupWithMostFiles()
+    {
+        $group = \App\Models\Group::withCount('files')
+            ->orderBy('files_count', 'desc')
+            ->first();
+
+        return response()->json([
+            'group_name' => $group->name,
+            'file_count' => $group->files_count,
+        ]);
+    }
+
+
 }

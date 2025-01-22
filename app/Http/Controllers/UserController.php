@@ -38,11 +38,11 @@ class UserController extends Controller
         }
     }
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $data = [];
         try {
-            $data = $this->userService->index();
+            $data = $this->userService->index($request);
             return Response::Success($data['users'], $data['message'], withPagination:true);
         } catch (Throwable $th) {
             $message = $th->getMessage();
@@ -50,18 +50,6 @@ class UserController extends Controller
         }
     }
 
-
-    public function getGroups(User $user): JsonResponse
-    {
-        $data = [];
-        try {
-            $data = $this->userService->getGroups($user);
-            return Response::Success($data['groups'], $data['message']);
-        } catch (Throwable $th) {
-            $message = $th->getMessage();
-            return Response::Error($data, $message);
-        }
-    }
 
     public function remove(User $user): JsonResponse
     {
@@ -84,7 +72,7 @@ class UserController extends Controller
             return Response::Error($data,$message , 403 );
         }
     }
-    
+
     public function getOperations(Group $group, User $user): JsonResponse
     {
         try {
@@ -95,7 +83,7 @@ class UserController extends Controller
         }
     }
 
-    
+
     public function getOperationsAsCSV(Group $group, User $user){
         return Excel::download(new UserOperationsExport($user),"$user->username.csv",ExcelExcel::CSV,[
             'Content-Type' => 'text/csv',
@@ -105,5 +93,18 @@ class UserController extends Controller
     public function getOperationsAsPDF(Group $group, User $user){
         return Excel::download(new UserOperationsExport($user),"$user->username.pdf",ExcelExcel::DOMPDF);
     }
+
+    public function mostJoinedUser()
+    {
+        $user = User::withCount('groups')
+            ->orderBy('groups_count', 'desc')
+            ->first();
+
+        return response()->json([
+            'username' => $user->username,
+            'group_count' => $user->groups_count,
+        ]);
+    }
+
 
 }

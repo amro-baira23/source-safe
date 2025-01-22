@@ -163,7 +163,7 @@ class UserService
 
         return ['message' => 'User removed from the group successfully', 'code' => 200];
     }
-    public function Groups(User $user): array
+    public function getGroups(User $user): array
     {
 
         return [

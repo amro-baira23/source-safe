@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Group;
+use App\Models\Notification;
 use App\Models\User;
 use Google\Client;
 use Illuminate\Http\Request;
@@ -19,6 +21,11 @@ class NotificationController extends Controller
         User::find($request->user_id)->update(['fcm_token' => $request->fcm_token]);
 
         return response()->json(['message' => 'Device token updated successfully']);
+    }
+
+    public function index(Request $request, Group $group){
+        $notifications = Notification::where("group_id", $group->id)->paginate(20);
+        return $notifications;
     }
 
     public function sendFcmNotification(Request $request)

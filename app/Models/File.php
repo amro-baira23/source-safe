@@ -47,7 +47,7 @@ class File extends Model
         return $this->hasMany(Lock::class, 'file_id');
     }
 
-    public function getBasename(){
+    public function basename(){
         return Str::of($this->name)->beforeLast(".");
     }
     public function prunable()

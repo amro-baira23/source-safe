@@ -39,15 +39,13 @@ class SendNotificationToUsersJob implements ShouldQueue
                 "body" => "User {$this->user->username} did {$this->operation} to File {$this->file}."
             ], 
         ]);
-        try{
-            Notification::create([
-                "group_id" => $this->group->id,
-                "title" => "File State Altered in Group {$this->group->name}",
-                "body" => "User {$this->user->username} did {$this->operation} to File {$this->file}."
-            ]);
-            $messaging->sendMulticast($message,$this->fcm_tokens);
-        } catch (Throwable $th){
+    
+        Notification::create([
+            "group_id" => $this->group->id,
+            "title" => "File State Altered in Group {$this->group->name}",
+            "body" => "User {$this->user->username} did {$this->operation} to File {$this->file}."
+        ]);
 
-        }
+        $messaging->sendMulticast($message,$this->fcm_tokens);
     }
 }

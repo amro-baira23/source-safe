@@ -7,6 +7,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
 use App\Models\Group;
 use App\Models\User;
+use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
@@ -99,8 +100,10 @@ Route::middleware(['jwt_auth:access',"LoggingAspect"])
             Route::get("/groups/{group}/files/{file}/versions","getAvailableFilesWithVersions");
             Route::get("/groups/{group}/files/{file}/download","download");
             Route::post("/groups/{group}/files/","store");
-            Route::post("/groups/{group}/files/check_in","checkIn");
-            Route::post("/groups/{group}/files/check_out","checkOut");
+            Route::post("/groups/{group}/files/check_in","checkIn")
+                ->middleware("event-aspect:check-in");
+            Route::post("/groups/{group}/files/check_out","checkOut")
+                ->middleware("event-aspect:check-out");
             Route::get("/groups/{group}/files/{file}/operations","getOperations");
             Route::get("/groups/{group}/files/{file}/operations/csv","getOperationsAsCSV");
             Route::get("/groups/{group}/files/{file}/operations/pdf","getOperationsAsPDF");
@@ -110,14 +113,15 @@ Route::middleware(['jwt_auth:access',"LoggingAspect"])
 Route::middleware("jwt_auth:access")
     ->controller(NotificationController::class)->group(function () {
         Route::post("fcm_token","updateDeviceToken");
+        Route::get("groups/{group}/notifications","index");
         Route::post("notify","sendFcmNotification");
 });
 
-Route::middleware("jwt_auth:access")->post("/test/{group}",function (Group $group) {
-    $user = User::find(1);
-    $user->update([
-        "password" => Hash::make("12345678")
-    ]);
+Route::middleware(["jwt_auth:access","event-aspect"])->post("/test/{group}",function (Group $group) {
+    // $user = User::find(1);
+    // $user->update([
+    //     "password" => Hash::make("12345678")
+    // ]);
     // SendNotificationToUsersJob::dispatchSync($group->users()->whereNot("user_id",1)->get());   
     return "hello world";
 });

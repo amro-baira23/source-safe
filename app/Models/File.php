@@ -35,9 +35,9 @@ class File extends Model
         return $this->BelongsToMany(User::class,'versions');
     }
 
-    public function getFullPath($version){
-        $path = storage_path("app/projects_files/{$this->group->name}{$this->group->id}/$this->getBasename()" . "__$version");
-        if (Storage::fileExists($path))
+public function getFullPath($version = 1){
+        $path = storage_path("app/projects_files/{$this->group->name}{$this->group->id}/{$this->basename()}" . "__$version.{$this->extension()}");
+        // if (Storage::fileExists($path))
             return $path;
         return null;
     }
@@ -50,6 +50,11 @@ class File extends Model
     public function basename(){
         return Str::of($this->name)->beforeLast(".");
     }
+
+    public function extension(){
+        return Str::of($this->name)->afterLast(".");
+    }
+
     public function prunable()
     {
         $paths = Storage::allFiles("projects_files");

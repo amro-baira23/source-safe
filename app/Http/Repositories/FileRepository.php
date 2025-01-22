@@ -37,6 +37,9 @@ class FileRepository {
         ]);
     }
 
+    public function indexWithNotActive($group){
+        return File::where(["group_id"=>$group->id])->paginate(15);
+    }
 
     public function delete($file){
         return $file->delete();

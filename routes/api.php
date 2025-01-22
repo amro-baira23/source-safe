@@ -5,9 +5,11 @@ use App\Http\Controllers\FilesController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
+use App\Models\File;
 use App\Models\Group;
 use App\Models\User;
 use GuzzleHttp\Middleware;
+use Illuminate\Support\Facades\File as FacadesFile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
@@ -91,7 +93,8 @@ Route::middleware(['jwt_auth:access',"LoggingAspect"])
         });
 
         Route::middleware('AuthAspect:adminGroup')->group(function() {
-            Route::post('/groups/{group}/files/{file}/activate','activation');
+            Route::get('/groups/{group}/files/withNotActive','indexWithNotActive');
+            Route::post('/groups/{group}/files/{file}/activate','activate');
         });
 
         Route::middleware('AuthAspect:member')->group(function() {
@@ -117,11 +120,7 @@ Route::middleware("jwt_auth:access")
         Route::post("notify","sendFcmNotification");
 });
 
-Route::middleware(["jwt_auth:access","event-aspect"])->post("/test/{group}",function (Group $group) {
-    // $user = User::find(1);
-    // $user->update([
-    //     "password" => Hash::make("12345678")
-    // ]);
-    // SendNotificationToUsersJob::dispatchSync($group->users()->whereNot("user_id",1)->get());   
+Route::middleware(["jwt_auth:access"])->post("/test/{group}",function (Group $group) {
+    dump($path = File::find(1)->getFullPath());
     return "hello world";
 });

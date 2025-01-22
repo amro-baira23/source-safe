@@ -262,15 +262,23 @@ class FileService
         ];
     }
 
-
-    public function activation($file): array
+    public function indexWithNotActive($group): array
     {
+        $files = $this->fileRepository->indexWithNotActive($group);
+        return [
+            "data" => FileResource::collection($files),
+            "message" => "Not Active files",
+        ];
+    }
 
+    public function activate($file): array
+    {
         $file->active = 1;
         $file->save();
+
         return [
             'file' => new FileResource($file),
-            'message' => 'activation successfully'
+            'message' => 'activated successfully'
         ];
     }
 

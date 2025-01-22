@@ -183,11 +183,7 @@ class FilesController extends Controller
     }
 
 
-    public function indexWithNotActive( Group $group): JsonResponse
-    {
-        $data = $this->FileService->indexWithNotActive($group);
-        return Response::Success($data["data"],$data["message"],withPagination: true);
-    }
+    
 
     public function activation(Group $group,File $file): JsonResponse
     {

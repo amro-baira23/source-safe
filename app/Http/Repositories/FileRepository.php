@@ -8,6 +8,9 @@ class FileRepository {
 
 
     public function indexPerGroup($request,$group) {
+        if($request->user()->isAdminGroup($group)){
+            return File::where(["group_id"=>$group->id])->paginate(15);
+        }elseif($request->user()->isMember($group))
         return File::where(["group_id"=>$group->id,"active"=>1])
         ->when($request->name,function($query, $value) {
             return $query->where("name","like","%$value%");
@@ -20,10 +23,7 @@ class FileRepository {
         })->paginate(15);
     }
 
-    public function indexWithNotActive($group){
-        return File::where(["group_id"=>$group->id])->paginate(15);
-    }
-
+    
 
     public function storeActivated(string $name,Group $group){
         return $this->store($name, $group, active: 1);

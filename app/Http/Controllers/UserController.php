@@ -51,18 +51,6 @@ class UserController extends Controller
     }
 
 
-    public function getGroups(User $user): JsonResponse
-    {
-        $data = [];
-        try {
-            $data = $this->userService->getGroups($user);
-            return Response::Success($data['groups'], $data['message']);
-        } catch (Throwable $th) {
-            $message = $th->getMessage();
-            return Response::Error($data, $message);
-        }
-    }
-
     public function remove(User $user): JsonResponse
     {
         try {

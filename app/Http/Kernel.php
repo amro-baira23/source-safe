@@ -71,5 +71,6 @@ class Kernel extends HttpKernel
 
         'AuthAspect' => \App\Aspects\AuthRoleAspect::class,
         'LoggingAspect' => \App\Aspects\LoggingAspect::class,
+        "event-aspect" =>  \App\Aspects\EventAspect::class,
     ];
 }

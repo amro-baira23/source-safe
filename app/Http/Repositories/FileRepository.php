@@ -8,7 +8,7 @@ class FileRepository {
 
 
     public function indexPerGroup($request,$group) {
-        return File::where("group_id",$group->id)
+        return File::where(["group_id"=>$group->id,"active"=>1])
         ->when($request->name,function($query, $value) {
             return $query->where("name","like","%$value%");
         })->paginate(15);
@@ -20,8 +20,8 @@ class FileRepository {
         })->paginate(15);
     }
 
-    public function indexNotActive($group){
-        return File::where(["group_id"=>$group->id,"active" => 0 ])->paginate(15);
+    public function indexWithNotActive($group){
+        return File::where(["group_id"=>$group->id])->paginate(15);
     }
 
 

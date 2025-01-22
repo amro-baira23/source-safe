@@ -108,7 +108,7 @@ class UserController extends Controller
 
     public function mostJoinedUser()
     {
-        $user = \App\Models\User::withCount('groups')
+        $user = User::withCount('groups')
             ->orderBy('groups_count', 'desc')
             ->first();
 

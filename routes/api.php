@@ -37,11 +37,10 @@ Route::middleware(['jwt_auth:access','LoggingAspect'])
             Route::get('/users/{user}/groups', 'getGroups');
             Route::post('/users/{user}', 'remove');
 
-            Route::get('/most-joined-user', 'mostJoinedUser');
-            Route::get('/group-with-most-users', 'groupWithMostUsers');
-            Route::get('/group-with-most-files', 'groupWithMostFiles');
+            Route::get('/most_joined_user', 'mostJoinedUser');
 
-           
+
+
 
         });
 
@@ -66,6 +65,9 @@ Route::middleware(['jwt_auth:access',"LoggingAspect"])
             Route::get('/groups','getAllGroups');
             Route::post('/groups/{group}/delete_with_files','deleteGroupWithFiles');
             Route::post('/groups/{group}/soft_delete','softDeleteGroup');
+
+            Route::get('/group_with_most_users', 'groupWithMostUsers');
+            Route::get('/group_with_most_files', 'groupWithMostFiles');
         });
 
         Route::middleware('AuthAspect:member')->group(function() {

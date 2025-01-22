@@ -163,7 +163,7 @@ class UserService
 
         return ['message' => 'User removed from the group successfully', 'code' => 200];
     }
-    public function getGroups(User $user): array
+    public function Groups(User $user): array
     {
 
         return [
@@ -173,7 +173,12 @@ class UserService
     }
     public function getOperations(User $user): array
     {
-        $operations = $user->locks()->paginate(20);
+        $operations = $user->locks()
+            ->whereHas("file",function ($query) {
+                return $query->where("group_id",request("group")->id);
+            })
+            ->paginate(20);
+
         return [
             'operations' => operationsResource::collection($operations),
             'message' => 'All operations by this user.'

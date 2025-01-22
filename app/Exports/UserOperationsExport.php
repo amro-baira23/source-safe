@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Lock;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -25,9 +26,12 @@ class UserOperationsExport implements FromCollection, WithHeadings, WithColumnWi
     */
     public function collection()
     {
-        $collection = $collection = DB::table("locks")
+        $collection = $collection = Lock::query()
             ->select("files.name as file", "locks.change","locks.created_at as date")
-            ->where("user_id",request("user"))
+            ->where("user_id",request()->user()->id)
+            ->whereHas("file",function ($query) {
+                return $query->where("group_id",request("group")->id);
+            })
             ->join("files","locks.file_id","files.id")
             ->orderBy("locks.created_at","desc")
             ->get(); 

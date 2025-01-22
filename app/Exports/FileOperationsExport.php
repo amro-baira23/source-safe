@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\File;
+use App\Models\Lock;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
@@ -42,6 +43,7 @@ class FileOperationsExport implements FromCollection, WithHeadings, WithColumnWi
     {
         return [
             "A" => 15,
+            "B" => 30,
             "C" => 15
         ];
     }

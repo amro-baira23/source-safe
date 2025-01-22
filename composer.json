@@ -9,6 +9,7 @@
         "dompdf/dompdf": "^3.0",
         "google/apiclient": "^2.18",
         "guzzlehttp/guzzle": "^7.2",
+        "kreait/laravel-firebase": "^5.8",
         "laravel/framework": "^10.0",
         "laravel/sanctum": "^3.2",
         "laravel/tinker": "^2.8",
